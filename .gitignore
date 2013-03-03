@@ -17,6 +17,7 @@ develop-eggs
 .installed.cfg
 lib
 lib64
+joomla3
 
 # Installer logs
 pip-log.txt
