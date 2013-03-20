@@ -215,7 +215,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QDoubleSpinBox" name="doubleSpinBox">
+           <widget class="QDoubleSpinBox" name="rateCheck">
             <property name="maximum">
              <double>300.000000000000000</double>
             </property>
