@@ -44,7 +44,7 @@ class Loader(QtGui.QMainWindow):
         self.pluginChoosePath.clicked.connect(self.setDirectory )
         self.pluginChoosePath.related = self.pluginPath
         
-        self.btnRun.clicked.connect(self.start)
+        self.btnRun.clicked.connect(self.onBtnRunClicked)
         
         self._event = Event()
         self._event.news.connect(self.onNews)
@@ -58,6 +58,12 @@ class Loader(QtGui.QMainWindow):
     
     def onNews(self, info):
         self.eventLog.insertPlainText(info+"\n")
+    
+    def onBtnRunClicked(self):
+        self.start() if self.btnRun.isChecked() else self.stop()
+        
+    def stop(self):
+        self.runner.stop()
         
     def start(self):
         extentions = []
@@ -77,8 +83,8 @@ class Loader(QtGui.QMainWindow):
             extentions.append(extension.Plugin(name, path, joomla))
         
         # run a new thread
-        runner = extension.Runner(extentions, self._event, rate)
-        runner.start()
+        self.runner = extension.Runner(extentions, self._event, rate)
+        self.runner.start()
         
 ## ------------------------------------------------------------------------------------
 app = QtGui.QApplication(sys.argv)
