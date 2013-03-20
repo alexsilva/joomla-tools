@@ -10,8 +10,8 @@ class Event(extension.ExtEvent, QtCore.QObject):
     news = QtCore.Signal(str)
         
     def __init__(self):
-        extension.ExtEvent__init__(self)
         QtCore.QObject.__init__(self)
+        extension.ExtEvent.__init__(self)
         
     def set(self, info):
         self.news.emit( info )
@@ -46,8 +46,8 @@ class Loader(QtGui.QMainWindow):
         
         self.btnRun.clicked.connect(self.start)
         
-        self.event = Event()
-        self.event.news.connect(self.onNews)
+        self._event = Event()
+        self._event.news.connect(self.onNews)
         
     def setDirectory(self):
         sender = self.sender()
@@ -57,7 +57,7 @@ class Loader(QtGui.QMainWindow):
         sender.related.setText( directory )
     
     def onNews(self, info):
-        self.eventLog.setText( info )
+        self.eventLog.insertPlainText(info+"\n")
         
     def start(self):
         extentions = []
@@ -77,7 +77,7 @@ class Loader(QtGui.QMainWindow):
             extentions.append(extension.Plugin(name, path, joomla))
         
         # run a new thread
-        runner = extension.Runner(extentions, rate)
+        runner = extension.Runner(extentions, self._event, rate)
         runner.start()
         
 ## ------------------------------------------------------------------------------------

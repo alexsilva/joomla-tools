@@ -306,7 +306,7 @@ class Runner(threading.Thread):
     def stop(self):
         self._continue = False
         
-    def run():
+    def run(self):
         self.event.set("Runner Started [%s]" % datetime.now())
         ##
         while self._continue:
