@@ -307,6 +307,8 @@ class Runner(threading.Thread):
         self._continue = False
         
     def run():
+        self.event.set("Runner Started [%s]" % datetime.now())
+        ##
         while self._continue:
             for extension in self.extension:
                 admin =  self.extmap[extension].get("admin",None)
@@ -316,7 +318,8 @@ class Runner(threading.Thread):
                 if not site is None: site.send(site.check())
                 
             time.sleep( self.rate ) # rate check
-        self.event.set("Running Exit [%s]" % datetime.now())
+        ##
+        self.event.set("Runner Exit [%s]" % datetime.now())
 
 
 
