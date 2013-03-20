@@ -19,16 +19,6 @@ class Event(extension.ExtEvent, QtCore.QObject):
 ## -----------------------------------------------------------------------------
 class Loader(QtGui.QMainWindow):
     
-    def __getattr__(self, name):
-        if hasattr(self.uiMainWindow, name):
-            attr = getattr(self.uiMainWindow, name);
-        else:
-            try: attr = super(Loader, self).__getattr__(name)
-            except AttributeError as err:
-                print "AttributeError: invalid name '%s'" % name
-                raise err
-        return attr
-    
     def __init__(self):
         super(Loader, self).__init__()
         
@@ -48,6 +38,8 @@ class Loader(QtGui.QMainWindow):
         
         self._event = Event()
         self._event.news.connect(self.onNews)
+        
+        self.readSettings()
         
     def setDirectory(self):
         sender = self.sender()
@@ -85,6 +77,39 @@ class Loader(QtGui.QMainWindow):
         # run a new thread
         self.runner = extension.Runner(extentions, self._event, rate)
         self.runner.start()
+    
+    def __getattr__(self, name):
+        if hasattr(self.uiMainWindow, name):
+            attr = getattr(self.uiMainWindow, name);
+        else:
+            try: attr = super(Loader, self).__getattr__(name)
+            except AttributeError as err:
+                print "AttributeError: invalid name '%s'" % name
+                raise err
+        return attr
+    
+    def closeEvent(self, event):
+        settings = QtCore.QSettings("Developer", "AutoUpdate")
+        settings.setValue("mainWindow/geometry", self.saveGeometry())
+        settings.setValue("mainWindow/windowState", self.saveState())
+        settings.setValue("paths/joomla", self.joomlaPath.text())
+        settings.setValue("paths/component", self.componentPath.text())
+        settings.setValue("names/component", self.componentName.text())
+        settings.setValue("paths/plugin", self.pluginPath.text())
+        settings.setValue("names/plugin", self.pluginName.text())
+        settings.setValue("values/rate", self.rateCheck.value())
+        return super(Loader, self).closeEvent(event)
+        
+    def readSettings(self):
+        settings = QtCore.QSettings("Developer", "AutoUpdate")
+        self.restoreGeometry(settings.value("mainWindow/geometry"))
+        self.restoreState(settings.value("mainWindow/windowState"))
+        self.joomlaPath.setText(settings.value("paths/joomla"))
+        self.componentPath.setText(settings.value("paths/component"))
+        self.componentName.setText(settings.value("names/component"))
+        self.pluginPath.setText(settings.value("paths/plugin"))
+        self.pluginName.setText(settings.value("names/plugin"))
+        self.rateCheck.setValue(float(settings.value("values/rate", 1.0)))
         
 ## ------------------------------------------------------------------------------------
 app = QtGui.QApplication(sys.argv)
