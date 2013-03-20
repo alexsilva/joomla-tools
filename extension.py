@@ -296,31 +296,6 @@ def start(extensions=[], ratecheck=1.0, loop=False):
             if not admin is None: admin.send(admin.check())
             if not site is None: site.send(site.check())
         time.sleep(ratecheck)
-        
-## -----------------------------------------------------------------------------
-if __name__ == "__main__":
-    class Event(ExtEvent):
-        """ interface test """
-        
-        def __init__(self):
-            super(Event, self).__init__()
-            
-        def set(self, info):
-            print info
-    
-    event = Event()
-    
-    name = "pbevents"
-    joomla = "C:\wamp\www\web"
-    
-    path = os.path.join(os.getcwd(),"com_pbevents_0.3")
-    component = Component(name, path, joomla)
-    
-    path = os.path.join(path,"plugin")
-    plugin = Plugin(name, path, joomla)
-    
-    start([component, plugin], True)
-    print "Working..."
 
 
 
