@@ -5,14 +5,16 @@ import sys
 import os
 
 ## -----------------------------------------------------------------------------
-class Event(extension.ExtEvent):
-    """ interface test """
-    
+class Event(extension.ExtEvent, QtCore.QObject):
+    """ interface data """
+    news = QtCore.Signal(str)
+        
     def __init__(self):
-        super(Event, self).__init__()
+        extension.ExtEvent__init__(self)
+        QtCore.QObject.__init__(self)
         
     def set(self, info):
-        print info
+        self.news.emit( info )
         
 ## -----------------------------------------------------------------------------
 class Loader(QtGui.QMainWindow):
@@ -44,24 +46,30 @@ class Loader(QtGui.QMainWindow):
         
         self.btnRun.clicked.connect(self.start)
         
+        self.event = Event()
+        self.event.news.connect(self.onNews)
+        
     def setDirectory(self):
         sender = self.sender()
-        
         options = QtGui.QFileDialog.DontResolveSymlinks | QtGui.QFileDialog.ShowDirsOnly
         directory = QtGui.QFileDialog.getExistingDirectory(self, self.tr("Choose Dir"),
                                        sender.related.text(), options)
         sender.related.setText( directory )
     
+    def onNews(self, info):
+        self.eventLog.setText( info )
+        
     def start(self):
         extentions = []
         joomla = self.joomlaPath.text()
+        rate = self.rateCheck.value()
         
         if os.path.exists(self.componentPath.text()):
             name = self.componentName.text()
             path = self.componentPath.text()
             
             extentions.append(extension.Component(name, path, joomla))
-        
+            
         if os.path.exists(self.pluginPath.text()):
             name = self.pluginName.text()
             path = self.pluginPath.text()
@@ -69,7 +77,7 @@ class Loader(QtGui.QMainWindow):
             extentions.append(extension.Plugin(name, path, joomla))
         
         # run a new thread
-        runner = extension.Runner(extentions, )
+        runner = extension.Runner(extentions, rate)
         runner.start()
         
 ## ------------------------------------------------------------------------------------
