@@ -1,6 +1,7 @@
 # coding: utf-8
 from xml.etree.ElementTree import ElementTree
 from datetime import datetime
+import threading
 import shutil
 import time
 import os
@@ -274,28 +275,44 @@ class Site(ModelBase):
             setattr(self, key, getattr(extension.site, key))
 
 ## -----------------------------------------------------------------------------
-def start(extensions=[], ratecheck=1.0, loop=False):
-    extensionmap = {}
-    
-    for extension in extensions:
-        extensionmap[extension] = {}
+class Runner(threading.Thread):
+    """ start the work check """
+    def __init__(self, extension=[], rate=1.0):
+        super(Runner,self).__init__()
         
-        if hasattr(extension, "admin"):
-            extensionmap[extension]["admin"] = Admin(extension)
-            extensionmap[extension]["admin"].update()
+        self.extension = extension
+        self.rate = rate
+        
+        self.extmap = self.createExtmap()
+        self._continue = True
+        
+    def createExtmap(self):
+        """ atualiza o timer inicial """
+        extmap = {}
+        for extension in self.extension:
+            extmap[extension] = {}
             
-        if hasattr(extension, "site"):
-            extensionmap[extension]["site"] = Site(extension)
-            extensionmap[extension]["site"].update()
+            if hasattr(extension,"admin"):
+                extmap[extension]["admin"] = Admin(extension)
+                extmap[extension]["admin"].update()
             
-    while loop:
-        for extension in extensions:
-            admin = extensionmap[extension].get("admin",None)
-            site = extensionmap[extension].get("site",None)
-            
-            if not admin is None: admin.send(admin.check())
-            if not site is None: site.send(site.check())
-        time.sleep(ratecheck)
+            if hasattr(extension,"site"):
+                extmap[extension]["site"] = Site(extension)
+                extmap[extension]["site"].update()
+        return extmap
+        
+    def stop(self):
+        self._continue = False
+        
+    def run():
+        while self._continue:
+            for extension in self.extension:
+                admin =  self.extmap[extension].get("admin",None)
+                site =  self.extmap[extension].get("site",None)
+                if not admin is None: admin.send(admin.check())
+                if not site is None: site.send(site.check())
+            time.sleep( self.rate ) # rate check
+    
 
 
 
