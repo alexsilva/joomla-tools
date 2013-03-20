@@ -5,14 +5,29 @@ import shutil
 import time
 import os
 
+
 ## ---------------------------------------------------------------------------
-class ExtensionBase(object):
+class ExtEvent(object):
+    """ Base for event infos """
+    def __init__(self):
+        pass
+    
+    def set(self, info):
+        pass
+    
+## ---------------------------------------------------------------------------
+class ExtBase(object):
     prefix = ""
     
-    def __init__(self, name, path, joomla):
+    def __init__(self, name, path, joomla, event):
+        # full path of joomla
         self.joomlaPath = joomla
+        # extension name
         self.extName = name
+        # extension path
         self.extPath = path
+        # event info interface
+        self.event = event
         
         self.root = self.parseXml()
         
@@ -38,7 +53,7 @@ class ExtensionBase(object):
         return self.root.find(key)
 
 ## ---------------------------------------------------------------------------
-class Component(ExtensionBase):
+class Component(ExtBase):
     prefix = "com_"
     
     ## -----------------------------------------------------------------------
@@ -108,14 +123,14 @@ class Component(ExtensionBase):
             return os.path.join(self.extension.path, self.folder)
         
     ## -----------------------------------------------------------------------
-    def __init__(self, name, path, joomla):
-        super(Component, self).__init__(name, path, joomla)
+    def __init__(self, name, path, joomla, event):
+        super(Component, self).__init__(name, path, joomla, event)
         
         self.admin = Component.Admin(self)
         self.site = Component.Site(self)
 
 ## ---------------------------------------------------------------------------
-class Plugin(ExtensionBase):
+class Plugin(ExtBase):
     
     class Site(object):
         def __init__(self, extension):
@@ -154,8 +169,8 @@ class Plugin(ExtensionBase):
             return path
         
     ## -----------------------------------------------------------------------
-    def __init__(self, name, path, joomla):
-        super(Plugin, self).__init__(name, path, joomla)
+    def __init__(self, name, path, joomla, event):
+        super(Plugin, self).__init__(name, path, joomla, event)
         
         self.site = Plugin.Site(self)
 
@@ -231,15 +246,15 @@ class ModelBase(object):
             src, dst = build_path(file)
             shutil.copyfile(src, dst)
             self.conf[file] = os.path.getmtime(src)
-            print "Updated[%s] %s" %(datetime.now(), dst)
+            self.event.set("Updated[%s] %s" %(datetime.now(), dst))
             
         for file in changes["removed"]:
             src, dst = build_path(file)
             if os.path.exists(dst): os.remove(dst)
             # remove o arquivo da atualização.
             self.conf.pop(file, None)
-            print "Removed[%s] %s"%(datetime.now(), dst)
-        
+            self.event.set("Removed[%s] %s"%(datetime.now(), dst))
+            
 ## ---------------------------------------------------------------------------
 class Admin(ModelBase):
     def __init__(self, extension):
@@ -257,34 +272,44 @@ class Site(ModelBase):
         for key in dir(extension.site):
             if key.startswith("__"): continue # private data
             setattr(self, key, getattr(extension.site, key))
+
+## -----------------------------------------------------------------------------
+def start(extensions=[], ratecheck=1.0, loop=False):
+    extensionmap = {}
+    
+    for extension in extensions:
+        extensionmap[extension] = {}
+        
+        if hasattr(extension, "admin"):
+            extensionmap[extension]["admin"] = Admin(extension)
+            extensionmap[extension]["admin"].update()
             
+        if hasattr(extension, "site"):
+            extensionmap[extension]["site"] = Site(extension)
+            extensionmap[extension]["site"].update()
+            
+    while loop:
+        for extension in extensions:
+            admin = extensionmap[extension].get("admin",None)
+            site = extensionmap[extension].get("site",None)
+            
+            if not admin is None: admin.send(admin.check())
+            if not site is None: site.send(site.check())
+        time.sleep(ratecheck)
+        
 ## -----------------------------------------------------------------------------
 if __name__ == "__main__":
-    def start(extensions=[], ratecheck=1.0):
-        print "Working..."
-        extensionmap = {}
+    class Event(ExtEvent):
+        """ interface test """
         
-        for extension in extensions:
-            extensionmap[extension] = {}
+        def __init__(self):
+            super(Event, self).__init__()
             
-            if hasattr(extension, "admin"):
-                extensionmap[extension]["admin"] = Admin(extension)
-                extensionmap[extension]["admin"].update()
-                
-            if hasattr(extension, "site"):
-                extensionmap[extension]["site"] = Site(extension)
-                extensionmap[extension]["site"].update()
-                
-        while True:
-            for extension in extensions:
-                admin = extensionmap[extension].get("admin",None)
-                site = extensionmap[extension].get("site",None)
-                
-                if not admin is None: admin.send(admin.check())
-                if not site is None: site.send(site.check())
-            time.sleep(ratecheck)
-            
-    ## -------------------------------------------------------------------------
+        def set(self, info):
+            print info
+    
+    event = Event()
+    
     name = "pbevents"
     joomla = "C:\wamp\www\web"
     
@@ -294,8 +319,8 @@ if __name__ == "__main__":
     path = os.path.join(path,"plugin")
     plugin = Plugin(name, path, joomla)
     
-    start([component, plugin])
-    
+    start([component, plugin], True)
+    print "Working..."
 
 
 
