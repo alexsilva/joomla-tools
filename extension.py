@@ -20,16 +20,14 @@ class ExtEvent(object):
 class ExtBase(object):
     prefix = ""
     
-    def __init__(self, name, path, joomla, event):
+    def __init__(self, name, path, joomla):
         # full path of joomla
         self.joomlaPath = joomla
         # extension name
         self.extName = name
         # extension path
         self.extPath = path
-        # event info interface
-        self.event = event
-        
+                
         self.root = self.parseXml()
         
     @property
@@ -124,8 +122,8 @@ class Component(ExtBase):
             return os.path.join(self.extension.path, self.folder)
         
     ## -----------------------------------------------------------------------
-    def __init__(self, name, path, joomla, event):
-        super(Component, self).__init__(name, path, joomla, event)
+    def __init__(self, name, path, joomla):
+        super(Component, self).__init__(name, path, joomla)
         
         self.admin = Component.Admin(self)
         self.site = Component.Site(self)
@@ -170,17 +168,19 @@ class Plugin(ExtBase):
             return path
         
     ## -----------------------------------------------------------------------
-    def __init__(self, name, path, joomla, event):
-        super(Plugin, self).__init__(name, path, joomla, event)
+    def __init__(self, name, path, joomla):
+        super(Plugin, self).__init__(name, path, joomla)
         
         self.site = Plugin.Site(self)
 
 ## ---------------------------------------------------------------------------
 class ModelBase(object):
-    def __init__(self, extension):
+    def __init__(self, extension, event):
         self.extension = extension
+        # event info interface
+        self.event = event
         self.conf = {}
-    
+        
     def filesIn(self, folder):
         fpath = os.path.join(self.path, folder)
         content = []
@@ -258,8 +258,8 @@ class ModelBase(object):
             
 ## ---------------------------------------------------------------------------
 class Admin(ModelBase):
-    def __init__(self, extension):
-        super(Admin, self).__init__(extension)
+    def __init__(self, extension, event):
+        super(Admin, self).__init__(extension, event)
         
         for key in dir(extension.admin):
             if key.startswith("__"): continue # private data
@@ -267,18 +267,21 @@ class Admin(ModelBase):
             
 ## ---------------------------------------------------------------------------
 class Site(ModelBase):
-    def __init__(self, extension):
-        super(Site, self).__init__(extension)
+    def __init__(self, extension, event):
+        super(Site, self).__init__(extension, event)
         
         for key in dir(extension.site):
             if key.startswith("__"): continue # private data
             setattr(self, key, getattr(extension.site, key))
-
+            
 ## -----------------------------------------------------------------------------
 class Runner(threading.Thread):
     """ start the work check """
-    def __init__(self, extension=[], rate=1.0):
+    
+    def __init__(self, extension=[], event=None, rate=1.0):
         super(Runner,self).__init__()
+        # event info interface
+        self.event = event
         
         self.extension = extension
         self.rate = rate
@@ -291,13 +294,12 @@ class Runner(threading.Thread):
         extmap = {}
         for extension in self.extension:
             extmap[extension] = {}
-            
             if hasattr(extension,"admin"):
-                extmap[extension]["admin"] = Admin(extension)
+                extmap[extension]["admin"] = Admin(extension, self.event)
                 extmap[extension]["admin"].update()
-            
+                
             if hasattr(extension,"site"):
-                extmap[extension]["site"] = Site(extension)
+                extmap[extension]["site"] = Site(extension, self.event)
                 extmap[extension]["site"].update()
         return extmap
         
@@ -309,10 +311,12 @@ class Runner(threading.Thread):
             for extension in self.extension:
                 admin =  self.extmap[extension].get("admin",None)
                 site =  self.extmap[extension].get("site",None)
+                
                 if not admin is None: admin.send(admin.check())
                 if not site is None: site.send(site.check())
+                
             time.sleep( self.rate ) # rate check
-    
+        self.event.set("Running Exit [%s]" % datetime.now())
 
 
 
