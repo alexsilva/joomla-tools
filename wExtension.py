@@ -49,8 +49,8 @@ class Loader(QtGui.QMainWindow):
         sender.related.setText( directory )
     
     def onNews(self, info):
-        self.eventLog.insertPlainText(info+"\n")
-    
+        self.eventLog.appendPlainText(info)
+        
     def onBtnRunClicked(self):
         self.start() if self.btnRun.isChecked() else self.stop()
         
