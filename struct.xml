@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-
-<root path="C:\wamp\www\Joomla3">
-	<admin path="{root}administrator/components"></admin>
-	<site path="{root}components"></site>
-	<target name="com_test"></target>
-	<plugins path="{root}plugins"></plugins>
-	<contplugins path="{plugins}content"></contplugins>
-</root>
