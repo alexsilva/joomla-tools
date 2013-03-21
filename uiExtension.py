@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'extension.ui'
 #
-# Created: Wed Mar 20 22:33:14 2013
+# Created: Thu Mar 21 00:01:23 2013
 #      by: pyside-uic 0.2.14 running on PySide 1.1.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -276,6 +276,7 @@ class Ui_MainWindow(object):
         font.setFamily("Arial")
         font.setPointSize(8)
         self.eventLog.setFont(font)
+        self.eventLog.setReadOnly(True)
         self.eventLog.setPlainText("")
         self.eventLog.setObjectName("eventLog")
         self.verticalLayout_5.addWidget(self.eventLog)
