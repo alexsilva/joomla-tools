@@ -206,46 +206,36 @@ class Plugin(ExtBase):
     
 ## ---------------------------------------------------------------------------
 class ModelBase(object):
+    
     def __init__(self, extension, event):
         self.extension = extension
         # event info interface
         self.event = event
-        self.conf = {}
+        self.filelist = None
         
-    def filesIn(self, folder):
+    def getFilesIn(self, folder):
         fpath = os.path.join(self.path, folder)
         content = []
         for root, dirs, files in os.walk(fpath):
             for filename in files:
                 filepath = os.path.join(root, filename)
-                content.append(filepath)
+                ## usando o caminho relativo para o arquivo.
+                content.append(os.path.relpath(filepath, self.path))
         return content
     
-    def updateDir(self, path, mtime=0.0):
-        for filepath in self.filesIn(path.replace(self.path+os.sep,'')):
-            relpath = filepath.replace(self.path+os.sep,'')
-            self.conf[relpath] = os.path.getmtime(filepath)+mtime
+    def scanFiles(self):
+        self.filelist = []
+        self.filelist.extend(self.filenames)
         
-    def update(self):
-        path = self.path
-        
-        for filename in self.filenames:
-            filepath = os.path.join(path, filename)
-            self.conf[filename] = os.path.getmtime(filepath)
-            
         for folder in self.folders:
-            for filepath in self.filesIn(folder):
-                relpath = filepath.replace(self.path+os.sep,'')
-                self.conf[relpath] = os.path.getmtime(filepath)
-                
-        for lang in self.languages:
-            lpath = os.path.join(self.path, lang)
-            self.conf[lang] = os.path.getmtime(lpath)
-    
-    def check(self):
-        changes = {"changed": [], "removed": [], "new": []}
+            self.filelist.extend(self.getFilesIn(folder))
         
-        for file in self.conf.copy():
+        self.filelist.extend(self.languages)
+        
+    def check(self):
+        changes = {"changed":[], "removed":[], "new":[]}
+        
+        for file in self.filelist:
             src, dst = self.build_path(self.path, file)
             
             if os.path.exists(src):
@@ -256,7 +246,6 @@ class ModelBase(object):
                     changes["new"].append(file)
             else:
                 changes["removed"].append(file)
-                
         return changes
     
     def build_path(self, path, file):
@@ -281,12 +270,10 @@ class ModelBase(object):
                 dst = os.path.join(self.extension.joomla, 
                                    self.extension.adminFolder, 
                                    relpath, filename)
-            else:
-                raise RuntimeError, "In make path"
-        else:
-            raise RuntimeError, "In make path"
+            else: raise RuntimeError, "In make path"
+        else: raise RuntimeError, "In make path"
         return src, dst
-    
+        
     def send(self, changes):
         path = self.path
         
@@ -306,8 +293,9 @@ class ModelBase(object):
             src, dst = self.build_path(path, file)
             if os.path.exists(dst): os.remove(dst)
             
+            self.scanFiles() ## update list files
             self.event.info("Removed[%s] %s"%(datetime.now(), dst))
-        
+            
 ## ---------------------------------------------------------------------------
 class Admin(ModelBase):
     def __init__(self, extension, event):
@@ -316,7 +304,9 @@ class Admin(ModelBase):
         for key in dir(extension.admin):
             if key.startswith("__"): continue # private data
             setattr(self, key, getattr(extension.admin, key))
-            
+        
+        self.scanFiles() ## update list files
+        
 ## ---------------------------------------------------------------------------
 class Site(ModelBase):
     def __init__(self, extension, event):
@@ -325,7 +315,9 @@ class Site(ModelBase):
         for key in dir(extension.site):
             if key.startswith("__"): continue # private data
             setattr(self, key, getattr(extension.site, key))
-            
+        
+        self.scanFiles() ## update list files
+        
 ## -----------------------------------------------------------------------------
 class Runner(threading.Thread):
     """ start the work check """
