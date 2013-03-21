@@ -2,9 +2,11 @@
 from xml.etree.ElementTree import ElementTree
 from datetime import datetime
 import threading
+import filecmp
 import shutil
 import time
 import os
+from filecmp import cmpfiles
 
 ## ---------------------------------------------------------------------------
 class capture_errors(object):
@@ -53,12 +55,15 @@ class ExtBase(object):
     @property
     def name(self):
         return self.extName
+    
     @property
     def joomla(self):
         return self.joomlaPath
+    
     @property
     def path(self):
         return self.extPath
+    
     @property
     def fullname(self):
         return self.prefix +self.name
@@ -73,6 +78,7 @@ class ExtBase(object):
 
 ## ---------------------------------------------------------------------------
 class Component(ExtBase):
+    type = "component"
     prefix = "com_"
     
     ## -----------------------------------------------------------------------
@@ -150,6 +156,7 @@ class Component(ExtBase):
 
 ## ---------------------------------------------------------------------------
 class Plugin(ExtBase):
+    type = "plugin"
     
     class Site(object):
         def __init__(self, extension):
@@ -161,7 +168,7 @@ class Plugin(ExtBase):
             
         def __getitem__(self, key):
             return self.extension[key]
-        
+                
         @property
         def folder(self):
             return ""
@@ -192,7 +199,11 @@ class Plugin(ExtBase):
         super(Plugin, self).__init__(name, path, joomla)
         
         self.site = Plugin.Site(self)
-
+        
+    @property
+    def adminFolder(self):
+        return "administrator"
+    
 ## ---------------------------------------------------------------------------
 class ModelBase(object):
     def __init__(self, extension, event):
@@ -230,52 +241,73 @@ class ModelBase(object):
         for lang in self.languages:
             lpath = os.path.join(self.path, lang)
             self.conf[lang] = os.path.getmtime(lpath)
-            
+    
     def check(self):
-        changes = {"changed":[],"removed":[]}
-        for path in self.conf.copy():
-            filepath = os.path.join(self.path, path)
-            if os.path.exists(filepath):
-                if self.conf[path] != os.path.getmtime(filepath):
-                    changes["changed"].append(path)
+        changes = {"changed": [], "removed": [], "new": []}
+        
+        for file in self.conf.copy():
+            src, dst = self.build_path(self.path, file)
+            
+            if os.path.exists(src):
+                if os.path.exists(dst):
+                    if not filecmp.cmp(src, dst):
+                        changes["changed"].append(file)
+                else:
+                    changes["new"].append(file)
             else:
-                changes["removed"].append(path)
-                # reindexando a pasta do arquivo não econtrado.
-                self.updateDir(os.path.dirname(filepath), 0.001)
+                changes["removed"].append(file)
+                
         return changes
+    
+    def build_path(self, path, file):
+        relpath = os.path.dirname(file)
+        filename = os.path.basename(file)
         
-    def send(self, changes):
-        path = self.path
+        src = os.path.join(path, file)
+        dst = os.path.join(self.extension.joomla, self.basename, 
+                           self.extension.fullname, relpath)
         
-        def build_path(file):
-            relpath = os.path.dirname(file)
-            filename = os.path.basename(file)
-            src = os.path.join(path, file)
-            dst = os.path.join(self.extension.joomla, self.basename, 
-                               self.extension.fullname, relpath)
+        if os.path.exists(dst):
+            dst = os.path.join(dst, filename)
+            
+        elif os.path.exists(src):
+            dst = os.path.join(self.extension.joomla, 
+            os.path.dirname(self.basename), relpath)
+            
             if os.path.exists(dst):
                 dst = os.path.join(dst, filename)
                 
-            elif os.path.exists(src):
-               dst = os.path.join(self.extension.joomla, os.path.dirname(self.basename), 
-                                  relpath, filename)
+            elif self.extension.type == "plugin":
+                dst = os.path.join(self.extension.joomla, 
+                                   self.extension.adminFolder, 
+                                   relpath, filename)
             else:
                 raise RuntimeError, "In make path"
-            return src, dst
+        else:
+            raise RuntimeError, "In make path"
+        return src, dst
+    
+    def send(self, changes):
+        path = self.path
+        
+        for file in changes["new"]:
+            src, dst = self.build_path(path, file)
+            shutil.copyfile(src, dst)
+            
+            self.event.info("New[%s] %s" %(datetime.now(), dst))
             
         for file in changes["changed"]:
-            src, dst = build_path(file)
+            src, dst = self.build_path(path, file)
             shutil.copyfile(src, dst)
-            self.conf[file] = os.path.getmtime(src)
+            
             self.event.info("Updated[%s] %s" %(datetime.now(), dst))
             
         for file in changes["removed"]:
-            src, dst = build_path(file)
+            src, dst = self.build_path(path, file)
             if os.path.exists(dst): os.remove(dst)
-            # remove o arquivo da atualização.
-            self.conf.pop(file, None)
-            self.event.info("Removed[%s] %s"%(datetime.now(), dst))
             
+            self.event.info("Removed[%s] %s"%(datetime.now(), dst))
+        
 ## ---------------------------------------------------------------------------
 class Admin(ModelBase):
     def __init__(self, extension, event):
@@ -307,6 +339,7 @@ class Runner(threading.Thread):
         self.rate = rate
         
         self.extmap = self.createExtmap()
+        
         self._continue = True
         self.setDaemon(True)
         
@@ -317,13 +350,10 @@ class Runner(threading.Thread):
             extmap[extension] = {}
             if hasattr(extension,"admin"):
                 extmap[extension]["admin"] = Admin(extension, self._event)
-                extmap[extension]["admin"].update()
-                
             if hasattr(extension,"site"):
                 extmap[extension]["site"] = Site(extension, self._event)
-                extmap[extension]["site"].update()
         return extmap
-    
+        
     def setRate(self, value):
         """ altera o valor da taxa de atualização """
         self.rate = value
@@ -334,13 +364,13 @@ class Runner(threading.Thread):
     @capture_errors
     def execute(self):
         for extension in self.extension:
-            admin =  self.extmap[extension].get("admin",None)
-            site =  self.extmap[extension].get("site",None)
+            admin = self.extmap[extension].get("admin",None)
+            site = self.extmap[extension].get("site",None)
             
             if not admin is None: admin.send(admin.check())
             if not site is None: site.send(site.check())
         return True
-    
+        
     def run(self):
         self._event.info("Runner Started [%s]" % datetime.now())
         
@@ -348,7 +378,7 @@ class Runner(threading.Thread):
             time.sleep( self.rate ) # rate check
             
         self._event.stop("Runner Exit [%s]" % datetime.now())
-
+        
 
 
 
