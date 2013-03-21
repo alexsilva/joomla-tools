@@ -39,6 +39,7 @@ class Loader(QtGui.QMainWindow):
         
         self._event = Event()
         self._event.news.connect(self.onNews)
+        self.runner = None
         
         self.readSettings()
         self.runningInfo.setVisible(False)
@@ -72,7 +73,7 @@ class Loader(QtGui.QMainWindow):
         
     def stopRunner(self):
         """ safe stop """
-        if hasattr(self,"runner") and hasattr(self.runner,"stop"):
+        if hasattr(self.runner, "stop"):
             self.rateCheck.valueChanged.disconnect(self.runner.setRate)
             self.runner.stop() ## stop thread
         
