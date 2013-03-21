@@ -40,6 +40,7 @@ class Loader(QtGui.QMainWindow):
         self._event.news.connect(self.onNews)
         
         self.readSettings()
+        self.runningInfo.setVisible(False)
         
     def setDirectory(self):
         sender = self.sender()
@@ -77,17 +78,11 @@ class Loader(QtGui.QMainWindow):
         # run a new thread
         self.runner = extension.Runner(extentions, self._event, rate)
         self.runner.start()
-    
+        
     def __getattr__(self, name):
-        if hasattr(self.uiMainWindow, name):
-            attr = getattr(self.uiMainWindow, name);
-        else:
-            try: attr = super(Loader, self).__getattr__(name)
-            except AttributeError as err:
-                print "AttributeError: invalid name '%s'" % name
-                raise err
-        return attr
-    
+        return (getattr(self.uiMainWindow, name) if hasattr(self.uiMainWindow, name) else
+                        super(Loader, self).__getattr__(name))
+                
     def closeEvent(self, event):
         settings = QtCore.QSettings("Developer", "AutoUpdate")
         settings.setValue("mainWindow/geometry", self.saveGeometry())
