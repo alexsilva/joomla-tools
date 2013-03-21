@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'extension.ui'
 #
-# Created: Wed Mar 20 22:11:53 2013
+# Created: Wed Mar 20 22:33:14 2013
 #      by: pyside-uic 0.2.14 running on PySide 1.1.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -290,8 +290,8 @@ class Ui_MainWindow(object):
         MainWindow.setStatusBar(self.statusbar)
 
         self.retranslateUi(MainWindow)
-        QtCore.QObject.connect(self.btnRun, QtCore.SIGNAL("clicked(bool)"), self.stoppedInfo.setHidden)
-        QtCore.QObject.connect(self.btnRun, QtCore.SIGNAL("clicked(bool)"), self.runningInfo.setVisible)
+        QtCore.QObject.connect(self.btnRun, QtCore.SIGNAL("toggled(bool)"), self.stoppedInfo.setHidden)
+        QtCore.QObject.connect(self.btnRun, QtCore.SIGNAL("toggled(bool)"), self.runningInfo.setVisible)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
         MainWindow.setTabOrder(self.pluginPath, self.componentChoosePath)
         MainWindow.setTabOrder(self.componentChoosePath, self.componentPath)

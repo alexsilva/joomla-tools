@@ -490,7 +490,7 @@
  <connections>
   <connection>
    <sender>btnRun</sender>
-   <signal>clicked(bool)</signal>
+   <signal>toggled(bool)</signal>
    <receiver>stoppedInfo</receiver>
    <slot>setHidden(bool)</slot>
    <hints>
@@ -506,7 +506,7 @@
   </connection>
   <connection>
    <sender>btnRun</sender>
-   <signal>clicked(bool)</signal>
+   <signal>toggled(bool)</signal>
    <receiver>runningInfo</receiver>
    <slot>setVisible(bool)</slot>
    <hints>
