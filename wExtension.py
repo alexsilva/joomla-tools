@@ -57,11 +57,24 @@ class Loader(QtGui.QMainWindow):
         
     def stop(self):
         self.runner.stop()
+    
+    def isValidJoomlaPath(self, path):
+        if not os.path.exists(path):
+            QtGui.QMessageBox.critical(self, self.tr("Path Invalid!"),
+                       self.tr("Joomla path not set or is invalid."),
+                       QtGui.QMessageBox.Ok)
+            self.btnRun.setChecked(False)
+            valid = False
+        else:
+            valid = True
+        return valid
         
     def start(self):
         extentions = []
         joomla = self.joomlaPath.text()
         rate = self.rateCheck.value()
+        
+        if not self.isValidJoomlaPath(joomla): return
         
         if os.path.exists(self.componentPath.text()):
             name = self.componentName.text()
