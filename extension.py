@@ -288,6 +288,7 @@ class Runner(threading.Thread):
         
         self.extmap = self.createExtmap()
         self._continue = True
+        self.setDaemon(True)
         
     def createExtmap(self):
         """ atualiza o timer inicial """
