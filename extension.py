@@ -13,7 +13,13 @@ class ExtEvent(object):
     def __init__(self):
         pass
     
-    def set(self, info):
+    def info(self, value):
+        pass
+    
+    def error(self, value):
+        pass
+    
+    def stop(self, value=''):
         pass
     
 ## ---------------------------------------------------------------------------
@@ -247,14 +253,14 @@ class ModelBase(object):
             src, dst = build_path(file)
             shutil.copyfile(src, dst)
             self.conf[file] = os.path.getmtime(src)
-            self.event.set("Updated[%s] %s" %(datetime.now(), dst))
+            self.event.info("Updated[%s] %s" %(datetime.now(), dst))
             
         for file in changes["removed"]:
             src, dst = build_path(file)
             if os.path.exists(dst): os.remove(dst)
             # remove o arquivo da atualização.
             self.conf.pop(file, None)
-            self.event.set("Removed[%s] %s"%(datetime.now(), dst))
+            self.event.info("Removed[%s] %s"%(datetime.now(), dst))
             
 ## ---------------------------------------------------------------------------
 class Admin(ModelBase):
@@ -312,7 +318,7 @@ class Runner(threading.Thread):
         self._continue = False
         
     def run(self):
-        self.event.set("Runner Started [%s]" % datetime.now())
+        self.event.info("Runner Started [%s]" % datetime.now())
         ##
         while self._continue:
             for extension in self.extension:
@@ -324,7 +330,7 @@ class Runner(threading.Thread):
                 
             time.sleep( self.rate ) # rate check
         ##
-        self.event.set("Runner Exit [%s]" % datetime.now())
+        self.event.stop("Runner Exit [%s]" % datetime.now())
 
 
 

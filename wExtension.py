@@ -8,23 +8,33 @@ import os
 ## -----------------------------------------------------------------------------
 class Event(extension.ExtEvent, QtCore.QObject):
     """ interface data """
-    news = QtCore.Signal(str)
-        
+    onInfo = QtCore.Signal(str)
+    onError = QtCore.Signal(str)
+    onStop = QtCore.Signal(str)
+    
     def __init__(self):
         QtCore.QObject.__init__(self)
         extension.ExtEvent.__init__(self)
         
-    def set(self, info):
-        self.news.emit(info)
+    def info(self, value):
+        self.onInfo.emit(value)
+    
+    def error(self, value):
+        self.onError.emit(value)
         
+    def stop(self, value):
+        self.onStop.emit(value)
+    
 ## -----------------------------------------------------------------------------
 class Loader(QtGui.QMainWindow):
     """ MainWin loader """
     def __init__(self):
         super(Loader, self).__init__()
+        self.runner = None
         
         self.uiMainWindow = Ui_MainWindow()
         self.uiMainWindow.setupUi(self)
+        self.runningInfo.setVisible(False)
         
         self.joomlaChoosePath.clicked.connect(self.setDirectory )
         self.joomlaChoosePath.related = self.joomlaPath
@@ -38,11 +48,20 @@ class Loader(QtGui.QMainWindow):
         self.btnRun.clicked.connect(self.onBtnRunClicked)
         
         self._event = Event()
-        self._event.news.connect(self.onNews)
-        self.runner = None
+        self._event.onInfo.connect(self.onInfo)
+        self._event.onError.connect(self.onError)
+        self._event.onStop.connect(self.onStop)
         
         self.readSettings()
-        self.runningInfo.setVisible(False)
+        
+    def onInfo(self, info):
+        self.eventLog.appendHtml('<p style="color:blue;">%s</p>'%info)
+        
+    def onError(self, info):
+        self.eventLog.appendHtml('<p style="color:red;">%s</p>'%info)
+    
+    def onStop(self, info):
+        self.eventLog.appendHtml('<p style="color:green;">%s</p>'%info)
         
     def setDirectory(self):
         sender = self.sender()
@@ -50,9 +69,6 @@ class Loader(QtGui.QMainWindow):
         directory = QtGui.QFileDialog.getExistingDirectory(self, self.tr("Choose Dir"),
                                     sender.related.text(), options)
         sender.related.setText(directory if os.path.exists(directory) else sender.related.text())
-        
-    def onNews(self, info):
-        self.eventLog.appendPlainText(info)
         
     def onBtnRunClicked(self):
         self.start() if self.btnRun.isChecked() else self.stop()
