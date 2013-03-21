@@ -1,3 +1,4 @@
+# coding: utf-8
 from PySide import QtCore, QtGui
 from uiExtension import Ui_MainWindow
 import extension
@@ -18,7 +19,7 @@ class Event(extension.ExtEvent, QtCore.QObject):
         
 ## -----------------------------------------------------------------------------
 class Loader(QtGui.QMainWindow):
-    
+    """ MainWin loader """
     def __init__(self):
         super(Loader, self).__init__()
         
@@ -56,8 +57,8 @@ class Loader(QtGui.QMainWindow):
         self.start() if self.btnRun.isChecked() else self.stop()
         
     def stop(self):
-        self.runner.stop()
-    
+        self.stopRunner()
+        
     def isValidJoomlaPath(self, path):
         if not os.path.exists(path):
             QtGui.QMessageBox.critical(self, self.tr("Path Invalid!"),
@@ -68,6 +69,12 @@ class Loader(QtGui.QMainWindow):
         else:
             valid = True
         return valid
+        
+    def stopRunner(self):
+        """ safe stop """
+        if hasattr(self,"runner") and hasattr(self.runner,"stop"):
+            self.rateCheck.valueChanged.disconnect(self.runner.setRate)
+            self.runner.stop() ## stop thread
         
     def start(self):
         extentions = []
@@ -92,11 +99,16 @@ class Loader(QtGui.QMainWindow):
         self.runner = extension.Runner(extentions, self._event, rate)
         self.runner.start()
         
+        # taxa de atualização
+        self.rateCheck.valueChanged.connect(self.runner.setRate)
+        
     def __getattr__(self, name):
         return (getattr(self.uiMainWindow, name) if hasattr(self.uiMainWindow, name) else
                         super(Loader, self).__getattr__(name))
                 
     def closeEvent(self, event):
+        self.stopRunner()
+        
         settings = QtCore.QSettings("Developer", "AutoUpdate")
         settings.setValue("mainWindow/geometry", self.saveGeometry())
         settings.setValue("mainWindow/windowState", self.saveState())
@@ -106,7 +118,7 @@ class Loader(QtGui.QMainWindow):
         settings.setValue("paths/plugin", self.pluginPath.text())
         settings.setValue("names/plugin", self.pluginName.text())
         settings.setValue("values/rate", self.rateCheck.value())
-        return super(Loader, self).closeEvent(event)
+        return super(Loader,self).closeEvent(event)
         
     def readSettings(self):
         settings = QtCore.QSettings("Developer", "AutoUpdate")

@@ -302,7 +302,11 @@ class Runner(threading.Thread):
                 extmap[extension]["site"] = Site(extension, self.event)
                 extmap[extension]["site"].update()
         return extmap
-        
+    
+    def setRate(self, value):
+        """ altera o valor da taxa de atualização """
+        self.rate = value
+    
     def stop(self):
         self._continue = False
         
