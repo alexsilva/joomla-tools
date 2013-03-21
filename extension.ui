@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1024</width>
-    <height>600</height>
+    <width>1085</width>
+    <height>620</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -21,6 +21,12 @@
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
      <widget class="QGroupBox" name="groupBox">
+      <property name="font">
+       <font>
+        <family>Segoe Script</family>
+        <pointsize>8</pointsize>
+       </font>
+      </property>
       <property name="title">
        <string>Joomla</string>
       </property>
@@ -36,13 +42,27 @@
          <layout class="QHBoxLayout" name="horizontalLayout">
           <item>
            <widget class="QToolButton" name="joomlaChoosePath">
+            <property name="font">
+             <font>
+              <family>MV Boli</family>
+             </font>
+            </property>
             <property name="text">
              <string>Choose Path</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QLineEdit" name="joomlaPath"/>
+           <widget class="QLineEdit" name="joomlaPath">
+            <property name="font">
+             <font>
+              <family>Arial</family>
+             </font>
+            </property>
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
           </item>
          </layout>
         </widget>
@@ -52,6 +72,12 @@
     </item>
     <item>
      <widget class="QGroupBox" name="groupBox_2">
+      <property name="font">
+       <font>
+        <family>Segoe Script</family>
+        <pointsize>8</pointsize>
+       </font>
+      </property>
       <property name="title">
        <string>Component</string>
       </property>
@@ -73,13 +99,24 @@
          <layout class="QHBoxLayout" name="horizontalLayout_4">
           <item>
            <widget class="QLabel" name="label">
+            <property name="font">
+             <font>
+              <family>Segoe Script</family>
+             </font>
+            </property>
             <property name="text">
              <string>Name</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QLineEdit" name="componentName"/>
+           <widget class="QLineEdit" name="componentName">
+            <property name="font">
+             <font>
+              <family>Arial</family>
+             </font>
+            </property>
+           </widget>
           </item>
          </layout>
         </widget>
@@ -101,13 +138,27 @@
          <layout class="QHBoxLayout" name="horizontalLayout_2">
           <item>
            <widget class="QToolButton" name="componentChoosePath">
+            <property name="font">
+             <font>
+              <family>MV Boli</family>
+             </font>
+            </property>
             <property name="text">
              <string>Choose Path</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QLineEdit" name="componentPath"/>
+           <widget class="QLineEdit" name="componentPath">
+            <property name="font">
+             <font>
+              <family>Arial</family>
+             </font>
+            </property>
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
           </item>
          </layout>
         </widget>
@@ -122,6 +173,12 @@
         <horstretch>0</horstretch>
         <verstretch>0</verstretch>
        </sizepolicy>
+      </property>
+      <property name="font">
+       <font>
+        <family>Segoe Script</family>
+        <pointsize>8</pointsize>
+       </font>
       </property>
       <property name="title">
        <string>Plugin</string>
@@ -144,13 +201,24 @@
          <layout class="QHBoxLayout" name="horizontalLayout_5">
           <item>
            <widget class="QLabel" name="label_2">
+            <property name="font">
+             <font>
+              <family>Segoe Print</family>
+             </font>
+            </property>
             <property name="text">
              <string>Name</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QLineEdit" name="pluginName"/>
+           <widget class="QLineEdit" name="pluginName">
+            <property name="font">
+             <font>
+              <family>Arial</family>
+             </font>
+            </property>
+           </widget>
           </item>
          </layout>
         </widget>
@@ -172,13 +240,27 @@
          <layout class="QHBoxLayout" name="horizontalLayout_3">
           <item>
            <widget class="QToolButton" name="pluginChoosePath">
+            <property name="font">
+             <font>
+              <family>MV Boli</family>
+             </font>
+            </property>
             <property name="text">
              <string>Choose Path</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QLineEdit" name="pluginPath"/>
+           <widget class="QLineEdit" name="pluginPath">
+            <property name="font">
+             <font>
+              <family>Arial</family>
+             </font>
+            </property>
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
           </item>
          </layout>
         </widget>
@@ -188,6 +270,11 @@
     </item>
     <item>
      <widget class="QGroupBox" name="groupBox_5">
+      <property name="font">
+       <font>
+        <family>Segoe Script</family>
+       </font>
+      </property>
       <property name="title">
        <string>Configuration</string>
       </property>
@@ -209,6 +296,11 @@
          <layout class="QHBoxLayout" name="horizontalLayout_9">
           <item>
            <widget class="QLabel" name="label_3">
+            <property name="font">
+             <font>
+              <family>Segoe Print</family>
+             </font>
+            </property>
             <property name="text">
              <string>Rate check</string>
             </property>
@@ -246,17 +338,62 @@
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_11">
           <item>
-           <spacer name="horizontalSpacer">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
+           <widget class="QLabel" name="runningInfo">
+            <property name="enabled">
+             <bool>true</bool>
             </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+              <horstretch>1</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
             </property>
-           </spacer>
+            <property name="font">
+             <font>
+              <family>AR DELANEY</family>
+              <pointsize>10</pointsize>
+              <italic>true</italic>
+             </font>
+            </property>
+            <property name="autoFillBackground">
+             <bool>false</bool>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">color: rgb(0, 0, 255);</string>
+            </property>
+            <property name="text">
+             <string>RUNNING</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="stoppedInfo">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+              <horstretch>1</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="font">
+             <font>
+              <family>AR DELANEY</family>
+              <pointsize>10</pointsize>
+              <italic>true</italic>
+             </font>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">color: rgb(170, 0, 0);</string>
+            </property>
+            <property name="text">
+             <string>STOPPED</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
           </item>
           <item>
            <widget class="QPushButton" name="btnRun">
@@ -266,8 +403,14 @@
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
+            <property name="font">
+             <font>
+              <family>Segoe Print</family>
+              <pointsize>10</pointsize>
+             </font>
+            </property>
             <property name="text">
-             <string>run</string>
+             <string>execute</string>
             </property>
             <property name="checkable">
              <bool>true</bool>
@@ -285,6 +428,11 @@
     </item>
     <item>
      <widget class="QGroupBox" name="groupBox_4">
+      <property name="font">
+       <font>
+        <family>Segoe Script</family>
+       </font>
+      </property>
       <property name="title">
        <string>Logs</string>
       </property>
@@ -296,6 +444,15 @@
            <horstretch>0</horstretch>
            <verstretch>1</verstretch>
           </sizepolicy>
+         </property>
+         <property name="font">
+          <font>
+           <family>Arial</family>
+           <pointsize>8</pointsize>
+          </font>
+         </property>
+         <property name="plainText">
+          <string/>
          </property>
         </widget>
        </item>
@@ -309,13 +466,59 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1024</width>
+     <width>1085</width>
      <height>26</height>
     </rect>
    </property>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
+ <tabstops>
+  <tabstop>pluginPath</tabstop>
+  <tabstop>componentChoosePath</tabstop>
+  <tabstop>componentPath</tabstop>
+  <tabstop>pluginChoosePath</tabstop>
+  <tabstop>joomlaPath</tabstop>
+  <tabstop>joomlaChoosePath</tabstop>
+  <tabstop>componentName</tabstop>
+  <tabstop>pluginName</tabstop>
+  <tabstop>eventLog</tabstop>
+  <tabstop>btnRun</tabstop>
+  <tabstop>rateCheck</tabstop>
+ </tabstops>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>btnRun</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>stoppedInfo</receiver>
+   <slot>setHidden(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>942</x>
+     <y>369</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>739</x>
+     <y>369</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btnRun</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>runningInfo</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>942</x>
+     <y>369</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>434</x>
+     <y>369</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>
