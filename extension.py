@@ -6,10 +6,24 @@ import shutil
 import time
 import os
 
-
+## ---------------------------------------------------------------------------
+class capture_errors(object):
+    def __init__(self, func):
+        self.fun = func
+        
+    def __get__(self, inst, cls):
+        def wraper(*args, **kwargs):
+            try: result = self.fun(inst, *args, **kwargs)
+            except Exception as err:
+                inst._event.error("Error[%s] %s"%(datetime.now(), err))
+                result = False
+            return result
+        return wraper
+    
 ## ---------------------------------------------------------------------------
 class ExtEvent(object):
     """ Base for event infos """
+            
     def __init__(self):
         pass
     
@@ -283,11 +297,11 @@ class Site(ModelBase):
 ## -----------------------------------------------------------------------------
 class Runner(threading.Thread):
     """ start the work check """
-    
+        
     def __init__(self, extension=[], event=None, rate=1.0):
         super(Runner,self).__init__()
         # event info interface
-        self.event = event
+        self._event = event
         
         self.extension = extension
         self.rate = rate
@@ -302,11 +316,11 @@ class Runner(threading.Thread):
         for extension in self.extension:
             extmap[extension] = {}
             if hasattr(extension,"admin"):
-                extmap[extension]["admin"] = Admin(extension, self.event)
+                extmap[extension]["admin"] = Admin(extension, self._event)
                 extmap[extension]["admin"].update()
                 
             if hasattr(extension,"site"):
-                extmap[extension]["site"] = Site(extension, self.event)
+                extmap[extension]["site"] = Site(extension, self._event)
                 extmap[extension]["site"].update()
         return extmap
     
@@ -316,21 +330,24 @@ class Runner(threading.Thread):
     
     def stop(self):
         self._continue = False
-        
+    
+    @capture_errors
+    def execute(self):
+        for extension in self.extension:
+            admin =  self.extmap[extension].get("admin",None)
+            site =  self.extmap[extension].get("site",None)
+            
+            if not admin is None: admin.send(admin.check())
+            if not site is None: site.send(site.check())
+        return True
+    
     def run(self):
-        self.event.info("Runner Started [%s]" % datetime.now())
-        ##
-        while self._continue:
-            for extension in self.extension:
-                admin =  self.extmap[extension].get("admin",None)
-                site =  self.extmap[extension].get("site",None)
-                
-                if not admin is None: admin.send(admin.check())
-                if not site is None: site.send(site.check())
-                
+        self._event.info("Runner Started [%s]" % datetime.now())
+        
+        while self._continue and self.execute():
             time.sleep( self.rate ) # rate check
-        ##
-        self.event.stop("Runner Exit [%s]" % datetime.now())
+            
+        self._event.stop("Runner Exit [%s]" % datetime.now())
 
 
 
