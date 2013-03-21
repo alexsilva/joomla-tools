@@ -46,6 +46,8 @@ class Loader(QtGui.QMainWindow):
         self.pluginChoosePath.related = self.pluginPath
         
         self.btnRun.clicked.connect(self.onBtnRunClicked)
+        # taxa de atualização
+        self.rateCheck.valueChanged.connect(self.setRate)
         
         self._event = Event()
         self._event.onInfo.connect(self.onInfo)
@@ -55,13 +57,14 @@ class Loader(QtGui.QMainWindow):
         self.readSettings()
         
     def onInfo(self, info):
-        self.eventLog.appendHtml('<p style="color:blue;">%s</p>'%info)
+        self.eventLog.appendHtml('<p style="color:green;">%s</p>'%info)
         
     def onError(self, info):
         self.eventLog.appendHtml('<p style="color:red;">%s</p>'%info)
-    
+        self.btnRun.setChecked(False) # stop on error
+        
     def onStop(self, info):
-        self.eventLog.appendHtml('<p style="color:green;">%s</p>'%info)
+        self.eventLog.appendHtml('<p style="color:blue;">%s</p>'%info)
         
     def setDirectory(self):
         sender = self.sender()
@@ -73,9 +76,6 @@ class Loader(QtGui.QMainWindow):
     def onBtnRunClicked(self):
         self.start() if self.btnRun.isChecked() else self.stop()
         
-    def stop(self):
-        self.stopRunner()
-        
     def isValidJoomlaPath(self, path):
         if not os.path.exists(path):
             QtGui.QMessageBox.critical(self, self.tr("Path Invalid!"),
@@ -86,13 +86,11 @@ class Loader(QtGui.QMainWindow):
         else:
             valid = True
         return valid
+    
+    def setRate(self, value):
+        if self.runner: self.runner.setRate( value )
         
-    def stopRunner(self):
-        """ safe stop """
-        if hasattr(self.runner, "stop"):
-            self.runner.stop() ## stop thread
-            self.rateCheck.valueChanged.disconnect(self.runner.setRate)
-        
+    @extension.capture_errors
     def start(self):
         extentions = []
         joomla = self.joomlaPath.text()
@@ -115,18 +113,17 @@ class Loader(QtGui.QMainWindow):
         # run a new thread
         self.runner = extension.Runner(extentions, self._event, rate)
         self.runner.start()
-        
-        # taxa de atualização
-        self.rateCheck.valueChanged.connect(self.runner.setRate)
+    
+    def stop(self):
+        if self.runner: self.runner.stop() ## stop thread
         
     def __getattr__(self, name):
         return (getattr(self.uiMainWindow, name) if hasattr(self.uiMainWindow, name) else
                         super(Loader, self).__getattr__(name))
                 
     def closeEvent(self, event):
-        self.stopRunner()
-        
         settings = QtCore.QSettings("Developer", "AutoUpdate")
+        
         settings.setValue("mainWindow/geometry", self.saveGeometry())
         settings.setValue("mainWindow/windowState", self.saveState())
         settings.setValue("paths/joomla", self.joomlaPath.text())
@@ -139,6 +136,7 @@ class Loader(QtGui.QMainWindow):
         
     def readSettings(self):
         settings = QtCore.QSettings("Developer", "AutoUpdate")
+        
         self.restoreGeometry(settings.value("mainWindow/geometry"))
         self.restoreState(settings.value("mainWindow/windowState"))
         self.joomlaPath.setText(settings.value("paths/joomla"))
