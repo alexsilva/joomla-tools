@@ -14,7 +14,7 @@ class Event(extension.ExtEvent, QtCore.QObject):
         extension.ExtEvent.__init__(self)
         
     def set(self, info):
-        self.news.emit( info )
+        self.news.emit(info)
         
 ## -----------------------------------------------------------------------------
 class Loader(QtGui.QMainWindow):
@@ -45,9 +45,9 @@ class Loader(QtGui.QMainWindow):
         sender = self.sender()
         options = QtGui.QFileDialog.DontResolveSymlinks | QtGui.QFileDialog.ShowDirsOnly
         directory = QtGui.QFileDialog.getExistingDirectory(self, self.tr("Choose Dir"),
-                                       sender.related.text(), options)
-        sender.related.setText( directory )
-    
+                                    sender.related.text(), options)
+        sender.related.setText(directory if os.path.exists(directory) else sender.related.text())
+        
     def onNews(self, info):
         self.eventLog.appendPlainText(info)
         
