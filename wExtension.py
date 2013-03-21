@@ -74,8 +74,8 @@ class Loader(QtGui.QMainWindow):
     def stopRunner(self):
         """ safe stop """
         if hasattr(self.runner, "stop"):
-            self.rateCheck.valueChanged.disconnect(self.runner.setRate)
             self.runner.stop() ## stop thread
+            self.rateCheck.valueChanged.disconnect(self.runner.setRate)
         
     def start(self):
         extentions = []
