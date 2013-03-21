@@ -124,7 +124,7 @@
        </sizepolicy>
       </property>
       <property name="title">
-       <string>Pugin</string>
+       <string>Plugin</string>
       </property>
       <layout class="QHBoxLayout" name="horizontalLayout_8">
        <item>
@@ -189,7 +189,7 @@
     <item>
      <widget class="QGroupBox" name="groupBox_5">
       <property name="title">
-       <string>GroupBox</string>
+       <string>Configuration</string>
       </property>
       <layout class="QHBoxLayout" name="horizontalLayout_10">
        <item>
@@ -210,7 +210,7 @@
           <item>
            <widget class="QLabel" name="label_3">
             <property name="text">
-             <string>Rate Check</string>
+             <string>Rate check</string>
             </property>
            </widget>
           </item>
@@ -246,22 +246,6 @@
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_11">
           <item>
-           <widget class="QPushButton" name="btnRun">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text">
-             <string>Run</string>
-            </property>
-            <property name="checkable">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item>
            <spacer name="horizontalSpacer">
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
@@ -273,6 +257,22 @@
              </size>
             </property>
            </spacer>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btnRun">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>run</string>
+            </property>
+            <property name="checkable">
+             <bool>true</bool>
+            </property>
+           </widget>
           </item>
          </layout>
         </widget>

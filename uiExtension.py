@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'extension.ui'
 #
-# Created: Wed Mar 20 18:25:50 2013
+# Created: Wed Mar 20 21:03:46 2013
 #      by: pyside-uic 0.2.14 running on PySide 1.1.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -161,6 +161,8 @@ class Ui_MainWindow(object):
         self.frame_8.setObjectName("frame_8")
         self.horizontalLayout_11 = QtGui.QHBoxLayout(self.frame_8)
         self.horizontalLayout_11.setObjectName("horizontalLayout_11")
+        spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        self.horizontalLayout_11.addItem(spacerItem)
         self.btnRun = QtGui.QPushButton(self.frame_8)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
@@ -170,8 +172,6 @@ class Ui_MainWindow(object):
         self.btnRun.setCheckable(True)
         self.btnRun.setObjectName("btnRun")
         self.horizontalLayout_11.addWidget(self.btnRun)
-        spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
-        self.horizontalLayout_11.addItem(spacerItem)
         self.horizontalLayout_10.addWidget(self.frame_8)
         self.verticalLayout.addWidget(self.groupBox_5)
         self.groupBox_4 = QtGui.QGroupBox(self.centralwidget)
@@ -206,11 +206,11 @@ class Ui_MainWindow(object):
         self.groupBox_2.setTitle(QtGui.QApplication.translate("MainWindow", "Component", None, QtGui.QApplication.UnicodeUTF8))
         self.label.setText(QtGui.QApplication.translate("MainWindow", "Name", None, QtGui.QApplication.UnicodeUTF8))
         self.componentChoosePath.setText(QtGui.QApplication.translate("MainWindow", "Choose Path", None, QtGui.QApplication.UnicodeUTF8))
-        self.groupBox_3.setTitle(QtGui.QApplication.translate("MainWindow", "Pugin", None, QtGui.QApplication.UnicodeUTF8))
+        self.groupBox_3.setTitle(QtGui.QApplication.translate("MainWindow", "Plugin", None, QtGui.QApplication.UnicodeUTF8))
         self.label_2.setText(QtGui.QApplication.translate("MainWindow", "Name", None, QtGui.QApplication.UnicodeUTF8))
         self.pluginChoosePath.setText(QtGui.QApplication.translate("MainWindow", "Choose Path", None, QtGui.QApplication.UnicodeUTF8))
-        self.groupBox_5.setTitle(QtGui.QApplication.translate("MainWindow", "GroupBox", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_3.setText(QtGui.QApplication.translate("MainWindow", "Rate Check", None, QtGui.QApplication.UnicodeUTF8))
-        self.btnRun.setText(QtGui.QApplication.translate("MainWindow", "Run", None, QtGui.QApplication.UnicodeUTF8))
+        self.groupBox_5.setTitle(QtGui.QApplication.translate("MainWindow", "Configuration", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_3.setText(QtGui.QApplication.translate("MainWindow", "Rate check", None, QtGui.QApplication.UnicodeUTF8))
+        self.btnRun.setText(QtGui.QApplication.translate("MainWindow", "run", None, QtGui.QApplication.UnicodeUTF8))
         self.groupBox_4.setTitle(QtGui.QApplication.translate("MainWindow", "Logs", None, QtGui.QApplication.UnicodeUTF8))
 
