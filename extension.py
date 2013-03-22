@@ -343,12 +343,10 @@ class Runner(threading.Thread):
         # check files rate
         self.rate = rate
         
-        self.startExtensions()
-        
         # auto scan files
-        t = threading.Timer(self.scanRate, self._scanFiles)
-        t.setDaemon(True)
-        t.start()
+        if self.startExtensions():
+            t = threading.Timer(self.scanRate, self._scanFiles)
+            t.setDaemon(True); t.start()
         
         self.setDaemon(True)
         
