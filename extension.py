@@ -49,8 +49,7 @@ class ExtBase(object):
         self.extName = name
         # extension path
         self.extPath = path
-                
-        self.root = self.parseXml()
+        self.root = None
         
     @property
     def name(self):
@@ -71,8 +70,8 @@ class ExtBase(object):
     def parseXml(self):
         etree = ElementTree()
         xmpath = os.path.join(self.path, self.name+".xml")
-        return etree.parse(xmpath)
-    
+        self.root =  etree.parse(xmpath)
+        
     def __getitem__(self, key):
         return self.root.find(key)
 
@@ -212,7 +211,7 @@ class ModelBase(object):
         # event info interface
         self.event = event
         self.filelist = None
-        
+                
     def getFilesIn(self, folder):
         fpath = os.path.join(self.path, folder)
         content = []
@@ -298,25 +297,29 @@ class ModelBase(object):
             
 ## ---------------------------------------------------------------------------
 class Admin(ModelBase):
+    """ struct class admin """
     def __init__(self, extension, event):
         super(Admin, self).__init__(extension, event)
         
-        for key in dir(extension.admin):
-            if key.startswith("__"): continue # private data
-            setattr(self, key, getattr(extension.admin, key))
-        
+        self.parseXml() ## refs files
         self.scanFiles() ## update list files
-        
+    
+    def __getattr__(self, name):
+        result = getattr(self.extension.admin, name, getattr(self.extension, name, None))
+        return (result if not result is None else super(Admin,self).__getattr__(name))
+    
 ## ---------------------------------------------------------------------------
 class Site(ModelBase):
+    """ struct class site """
     def __init__(self, extension, event):
         super(Site, self).__init__(extension, event)
         
-        for key in dir(extension.site):
-            if key.startswith("__"): continue # private data
-            setattr(self, key, getattr(extension.site, key))
-        
+        self.parseXml() ## refs files
         self.scanFiles() ## update list files
+        
+    def __getattr__(self, name):
+        result = getattr(self.extension.site, name, getattr(self.extension, name, None))
+        return (result if not result is None else super(Site,self).__getattr__(name))
         
 ## -----------------------------------------------------------------------------
 class Runner(threading.Thread):
@@ -334,7 +337,8 @@ class Runner(threading.Thread):
         
         self._continue = True
         self.setDaemon(True)
-        
+    
+    @capture_errors
     def createExtmap(self):
         """ atualiza o timer inicial """
         extmap = {}

@@ -90,7 +90,6 @@ class Loader(QtGui.QMainWindow):
     def setRate(self, value):
         if self.runner: self.runner.setRate( value )
         
-    @extension.capture_errors
     def start(self):
         extentions = []
         joomla = self.joomlaPath.text()
