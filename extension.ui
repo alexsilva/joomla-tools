@@ -160,6 +160,20 @@
             </property>
            </widget>
           </item>
+          <item>
+           <widget class="QPushButton" name="pushButton">
+            <property name="toolTip">
+             <string>Zip all content.</string>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="icon">
+             <iconset>
+              <normaloff>media/zip.png</normaloff>media/zip.png</iconset>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
        </item>
@@ -262,6 +276,20 @@
             </property>
            </widget>
           </item>
+          <item>
+           <widget class="QPushButton" name="pushButton_2">
+            <property name="toolTip">
+             <string>Zip all content.</string>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="icon">
+             <iconset>
+              <normaloff>media/zip.png</normaloff>media/zip.png</iconset>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
        </item>
@@ -323,10 +351,68 @@
         </widget>
        </item>
        <item>
+        <widget class="QFrame" name="frame_6">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>1</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="frameShape">
+          <enum>QFrame::Box</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Sunken</enum>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout_6">
+          <item>
+           <widget class="QLabel" name="label_4">
+            <property name="text">
+             <string>Scan Files</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QDoubleSpinBox" name="scanFilesRate">
+            <property name="minimum">
+             <double>10.000000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>1800.000000000000000</double>
+            </property>
+            <property name="singleStep">
+             <double>5.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="scanFilesNow">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="toolTip">
+             <string>Rescan all files.</string>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="icon">
+             <iconset>
+              <normaloff>media/refresh.png</normaloff>media/refresh.png</iconset>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
         <widget class="QFrame" name="frame_8">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-           <horstretch>3</horstretch>
+           <horstretch>2</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
          </property>
@@ -421,9 +507,6 @@
         </widget>
        </item>
       </layout>
-      <zorder>frame_7</zorder>
-      <zorder>frame_7</zorder>
-      <zorder>frame_8</zorder>
      </widget>
     </item>
     <item>

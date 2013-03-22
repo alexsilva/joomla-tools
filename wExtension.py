@@ -28,6 +28,7 @@ class Event(extension.ExtEvent, QtCore.QObject):
 ## -----------------------------------------------------------------------------
 class Loader(QtGui.QMainWindow):
     """ MainWin loader """
+    
     def __init__(self):
         super(Loader, self).__init__()
         self.runner = None
@@ -46,8 +47,13 @@ class Loader(QtGui.QMainWindow):
         self.pluginChoosePath.related = self.pluginPath
         
         self.btnRun.clicked.connect(self.onBtnRunClicked)
+        
         # taxa de atualização
         self.rateCheck.valueChanged.connect(self.setRate)
+        # taxa de escaneamento de arquivos
+        self.scanFilesRate.valueChanged.connect(self.setScanRate)
+        # força o escaneamento dos arquivos
+        self.scanFilesNow.clicked.connect(self.scanNow)
         
         self._event = Event()
         self._event.onInfo.connect(self.onInfo)
@@ -90,9 +96,16 @@ class Loader(QtGui.QMainWindow):
     def setRate(self, value):
         if self.runner: self.runner.setRate( value )
         
+    def setScanRate(self, value):
+        if self.runner: self.runner.setScanRate( value )
+    
+    def scanNow(self):
+        if self.runner: self.runner.scanFiles()
+        
     def start(self):
         extentions = []
         joomla = self.joomlaPath.text()
+        scanRate = self.scanFilesRate.value()
         rate = self.rateCheck.value()
         
         if not self.isValidJoomlaPath(joomla): return
@@ -100,17 +113,15 @@ class Loader(QtGui.QMainWindow):
         if os.path.exists(self.componentPath.text()):
             name = self.componentName.text()
             path = self.componentPath.text()
-            
             extentions.append(extension.Component(name, path, joomla, self._event))
             
         if os.path.exists(self.pluginPath.text()):
             name = self.pluginName.text()
             path = self.pluginPath.text()
-            
             extentions.append(extension.Plugin(name, path, joomla, self._event))
         
         # run a new thread
-        self.runner = extension.Runner(extentions, self._event, rate)
+        self.runner = extension.Runner(extentions, self._event, scanRate, rate)
         self.runner.start()
     
     def stop(self):
