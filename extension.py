@@ -6,7 +6,6 @@ import filecmp
 import shutil
 import time
 import os
-from filecmp import cmpfiles
 
 ## ---------------------------------------------------------------------------
 class capture_errors(object):
@@ -42,14 +41,15 @@ class ExtEvent(object):
 class ExtBase(object):
     prefix = ""
     
-    def __init__(self, name, path, joomla):
+    def __init__(self, name, path, joomla, event):
+        self.root = self.admin = self.site = None
         # full path of joomla
         self.joomlaPath = joomla
         # extension name
         self.extName = name
         # extension path
         self.extPath = path
-        self.root = None
+        self.event = event
         
     @property
     def name(self):
@@ -70,148 +70,27 @@ class ExtBase(object):
     def parseXml(self):
         etree = ElementTree()
         xmpath = os.path.join(self.path, self.name+".xml")
-        self.root =  etree.parse(xmpath)
+        return etree.parse(xmpath)
         
     def __getitem__(self, key):
         return self.root.find(key)
-
+    
+    def start(self):
+        self.root = self.parseXml() ## refs files
+        if not self.admin is None: self.admin.scanFiles() ## update list files
+        if not self.site is None: self.site.scanFiles() ## update list files
+        
 ## ---------------------------------------------------------------------------
-class Component(ExtBase):
-    type = "component"
-    prefix = "com_"
+class ASBase(object):
     
-    ## -----------------------------------------------------------------------
-    class Admin(object):
-        basename = os.path.join("administrator", "components")
-        
-        def __init__(self, extension):
-            self.extension = extension
-            
-        def __getitem__(self, key):
-            return self.extension["administration"].find(key)
-        
-        @property
-        def folder(self):
-            return self["files"].get("folder")
-        
-        @property
-        def folders(self):
-            files = self["files"]
-            return [e.text for e in (files.findall("folder") if not files is None else [])]
-            
-        @property
-        def filenames(self):
-            files = self["files"]
-            return [e.text for e in (files.findall("filename") if not files is None else [])]
-        
-        @property
-        def languages(self):
-            lang = self["languages"]
-            return [e.text.replace("/",os.sep) for e in (lang.findall("language") if not lang is None else [])]
-        
-        @property
-        def path(self):
-            return os.path.join(self.extension.path, self.folder)
-        
-    ## -----------------------------------------------------------------------
-    class Site(object):
-        basename = "components"
-        
-        def __init__(self, extension):
-            self.extension = extension
-            
-        def __getitem__(self, key):
-            return self.extension[key]
-        
-        @property
-        def folder(self):
-            return self["files"].get("folder")
-            
-        @property
-        def folders(self):
-            files = self["files"]
-            return [e.text for e in (files.findall("folder") if not files is None else [])]
-        
-        @property
-        def filenames(self):
-            files = self["files"]
-            return [e.text for e in (files.findall("filename") if not files is None else [])]
-        
-        @property
-        def languages(self):
-            lang = self["languages"]
-            return [e.text.replace("/",os.sep) for e in (lang.findall("language") if not lang is None else [])]
-        
-        @property
-        def path(self):
-            return os.path.join(self.extension.path, self.folder)
-        
-    ## -----------------------------------------------------------------------
-    def __init__(self, name, path, joomla):
-        super(Component, self).__init__(name, path, joomla)
-        
-        self.admin = Component.Admin(self)
-        self.site = Component.Site(self)
-
-## ---------------------------------------------------------------------------
-class Plugin(ExtBase):
-    type = "plugin"
-    
-    class Site(object):
-        def __init__(self, extension):
-            self.extension = extension
-        
-        @property
-        def basename(self):
-            return os.path.join("plugins", self.extension.root.get("group"))
-            
-        def __getitem__(self, key):
-            return self.extension[key]
-                
-        @property
-        def folder(self):
-            return ""
-        
-        @property
-        def folders(self):
-            files = self["files"]
-            return [e.text for e in (files.findall("folder") if not files is None else [])]
-            
-        @property
-        def filenames(self):
-            files = self["files"]
-            return [e.text for e in (files.findall("filename") if not files is None else [])]
-        
-        @property
-        def languages(self):
-            lang = self["languages"]
-            return [e.text.replace("/",os.sep) for e in (lang.findall("language") if not lang is None else [])]
-        
-        @property
-        def path(self):
-            path = os.path.join(self.extension.path, self.folder)
-            path = path.rstrip("/").rstrip(os.sep)
-            return path
-        
-    ## -----------------------------------------------------------------------
-    def __init__(self, name, path, joomla):
-        super(Plugin, self).__init__(name, path, joomla)
-        
-        self.site = Plugin.Site(self)
-        
-    @property
-    def adminFolder(self):
-        return "administrator"
-    
-## ---------------------------------------------------------------------------
-class ModelBase(object):
-    
-    def __init__(self, extension, event):
+    def __init__(self, extension):
         self.extension = extension
-        # event info interface
-        self.event = event
         self.filelist = None
-                
+        
+    def __getattr__(self, name):
+        return (getattr(self.extension, name, None) if hasattr(self.extension, name) else 
+                        super(ASBase, self).__getattr__(name))
+        
     def getFilesIn(self, folder):
         fpath = os.path.join(self.path, folder)
         content = []
@@ -296,30 +175,132 @@ class ModelBase(object):
             self.event.info("Removed[%s] %s"%(datetime.now(), dst))
             
 ## ---------------------------------------------------------------------------
-class Admin(ModelBase):
-    """ struct class admin """
-    def __init__(self, extension, event):
-        super(Admin, self).__init__(extension, event)
+class Component(ExtBase):
+    type = "component"
+    prefix = "com_"
+    
+    ## -----------------------------------------------------------------------
+    class Admin(ASBase):
+        basename = os.path.join("administrator", "components")
         
-        self.parseXml() ## refs files
-        self.scanFiles() ## update list files
-    
-    def __getattr__(self, name):
-        result = getattr(self.extension.admin, name, getattr(self.extension, name, None))
-        return (result if not result is None else super(Admin,self).__getattr__(name))
-    
+        def __init__(self, extension):
+            super(Component.Admin, self).__init__(extension)
+            
+        def __getitem__(self, key):
+            return self.extension["administration"].find(key)
+        
+        @property
+        def folder(self):
+            return self["files"].get("folder")
+        
+        @property
+        def folders(self):
+            files = self["files"]
+            return [e.text for e in (files.findall("folder") if not files is None else [])]
+            
+        @property
+        def filenames(self):
+            files = self["files"]
+            return [e.text for e in (files.findall("filename") if not files is None else [])]
+        
+        @property
+        def languages(self):
+            lang = self["languages"]
+            return [e.text.replace("/",os.sep) for e in (lang.findall("language") if not lang is None else [])]
+        
+        @property
+        def path(self):
+            return os.path.join(self.extension.path, self.folder)
+        
+    ## -----------------------------------------------------------------------
+    class Site(ASBase):
+        basename = "components"
+        
+        def __init__(self, extension):
+            super(Component.Site, self).__init__(extension)
+            
+        def __getitem__(self, key):
+            return self.extension[key]
+        
+        @property
+        def folder(self):
+            return self["files"].get("folder")
+            
+        @property
+        def folders(self):
+            files = self["files"]
+            return [e.text for e in (files.findall("folder") if not files is None else [])]
+        
+        @property
+        def filenames(self):
+            files = self["files"]
+            return [e.text for e in (files.findall("filename") if not files is None else [])]
+        
+        @property
+        def languages(self):
+            lang = self["languages"]
+            return [e.text.replace("/",os.sep) for e in (lang.findall("language") if not lang is None else [])]
+        
+        @property
+        def path(self):
+            return os.path.join(self.extension.path, self.folder)
+        
+    ## -----------------------------------------------------------------------
+    def __init__(self, name, path, joomla, event):
+        super(Component, self).__init__(name, path, joomla, event)
+        
+        self.admin = Component.Admin(self)
+        self.site = Component.Site(self)
+
 ## ---------------------------------------------------------------------------
-class Site(ModelBase):
-    """ struct class site """
-    def __init__(self, extension, event):
-        super(Site, self).__init__(extension, event)
+class Plugin(ExtBase):
+    type = "plugin"
+    
+    class Site(ASBase):
+        def __init__(self, extension):
+            super(Plugin.Site, self).__init__(extension)
         
-        self.parseXml() ## refs files
-        self.scanFiles() ## update list files
+        @property
+        def basename(self):
+            return os.path.join("plugins", self.extension.root.get("group"))
+            
+        def __getitem__(self, key):
+            return self.extension[key]
+                
+        @property
+        def folder(self):
+            return ""
         
-    def __getattr__(self, name):
-        result = getattr(self.extension.site, name, getattr(self.extension, name, None))
-        return (result if not result is None else super(Site,self).__getattr__(name))
+        @property
+        def folders(self):
+            files = self["files"]
+            return [e.text for e in (files.findall("folder") if not files is None else [])]
+            
+        @property
+        def filenames(self):
+            files = self["files"]
+            return [e.text for e in (files.findall("filename") if not files is None else [])]
+        
+        @property
+        def languages(self):
+            lang = self["languages"]
+            return [e.text.replace("/",os.sep) for e in (lang.findall("language") if not lang is None else [])]
+        
+        @property
+        def path(self):
+            path = os.path.join(self.extension.path, self.folder)
+            path = path.rstrip("/").rstrip(os.sep)
+            return path
+        
+    ## -----------------------------------------------------------------------
+    def __init__(self, name, path, joomla, event):
+        super(Plugin, self).__init__(name, path, joomla, event)
+        
+        self.site = Plugin.Site(self)
+        
+    @property
+    def adminFolder(self):
+        return "administrator"
         
 ## -----------------------------------------------------------------------------
 class Runner(threading.Thread):
@@ -333,22 +314,10 @@ class Runner(threading.Thread):
         self.extension = extension
         self.rate = rate
         
-        self.extmap = self.createExtmap()
+        self.startExtensions()
         
         self._continue = True
         self.setDaemon(True)
-    
-    @capture_errors
-    def createExtmap(self):
-        """ atualiza o timer inicial """
-        extmap = {}
-        for extension in self.extension:
-            extmap[extension] = {}
-            if hasattr(extension,"admin"):
-                extmap[extension]["admin"] = Admin(extension, self._event)
-            if hasattr(extension,"site"):
-                extmap[extension]["site"] = Site(extension, self._event)
-        return extmap
         
     def setRate(self, value):
         """ altera o valor da taxa de atualização """
@@ -358,13 +327,19 @@ class Runner(threading.Thread):
         self._continue = False
     
     @capture_errors
-    def execute(self):
+    def startExtensions(self):
+        """ analiza os dados e cria a lista de arquivos """
         for extension in self.extension:
-            admin = self.extmap[extension].get("admin",None)
-            site = self.extmap[extension].get("site",None)
-            
-            if not admin is None: admin.send(admin.check())
-            if not site is None: site.send(site.check())
+            extension.start()
+        return True
+    
+    @capture_errors
+    def execute(self):
+        for ext in self.extension:
+            if not ext.admin is None:
+                ext.admin.send(ext.admin.check())
+            if not ext.site is None:
+                ext.site.send(ext.site.check())
         return True
         
     def run(self):

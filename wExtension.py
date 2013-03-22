@@ -101,13 +101,13 @@ class Loader(QtGui.QMainWindow):
             name = self.componentName.text()
             path = self.componentPath.text()
             
-            extentions.append(extension.Component(name, path, joomla))
+            extentions.append(extension.Component(name, path, joomla, self._event))
             
         if os.path.exists(self.pluginPath.text()):
             name = self.pluginName.text()
             path = self.pluginPath.text()
             
-            extentions.append(extension.Plugin(name, path, joomla))
+            extentions.append(extension.Plugin(name, path, joomla, self._event))
         
         # run a new thread
         self.runner = extension.Runner(extentions, self._event, rate)
