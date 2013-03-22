@@ -142,6 +142,7 @@ class Loader(QtGui.QMainWindow):
         settings.setValue("paths/plugin", self.pluginPath.text())
         settings.setValue("names/plugin", self.pluginName.text())
         settings.setValue("values/rate", self.rateCheck.value())
+        settings.setValue("values/scanFiles", self.scanFilesRate.value())
         return super(Loader,self).closeEvent(event)
         
     def readSettings(self):
@@ -154,7 +155,9 @@ class Loader(QtGui.QMainWindow):
         self.componentName.setText(settings.value("names/component"))
         self.pluginPath.setText(settings.value("paths/plugin"))
         self.pluginName.setText(settings.value("names/plugin"))
+        
         self.rateCheck.setValue(float(settings.value("values/rate", 1.0)))
+        self.scanFilesRate.setValue(float(settings.value("values/scanFiles", 10.0)))
         
 ## ------------------------------------------------------------------------------------
 app = QtGui.QApplication(sys.argv)
