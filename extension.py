@@ -392,9 +392,9 @@ class Runner(threading.Thread):
         
         while self._continue and self.execute():
             time.sleep( self.rate ) # rate check
-            
-        self._event.stop("[%s] Runner exit" % datetime.now())
         
+        self._event.stop("[%s] Runner exit" % datetime.now())
+        self._continue = False
 
 
 
