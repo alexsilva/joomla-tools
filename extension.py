@@ -146,7 +146,7 @@ class ASBase(object):
     def isLanguage(self, path):
         return path.startswith("language")
     
-    def buildPath(self, path, file):
+    def buildPath(self, path, file, join=True):
         relpath = os.path.dirname(file)
         filename = os.path.basename(file)
         src = os.path.join(path, file)
@@ -165,17 +165,23 @@ class ASBase(object):
                 dst = os.path.join(self.extension.joomla, self.basename, 
                                    self.extension.fullname, relpath)
         else: raise RuntimeError, "In make path: Type error!"
-        # contrói os diretórios necessários.
-        if not os.path.exists(dst): os.makedirs(dst)
-        # caminho final do arquivo.
-        dst = os.path.join(dst, filename)
+        
+        if join: dst = os.path.join(dst, filename)
+        else: dst = {"d": dst, "f": filename}
+        
         return src, dst
-    
+        
     def send(self, changes):
         path = self.path
         
         for file in changes["new"]:
-            src, dst = self.buildPath(path, file)
+            src, dst = self.buildPath(path, file, False)
+            
+            # contrói os diretórios necessários.
+            if not os.path.exists(dst["d"]):
+                os.makedirs(dst["d"])
+            
+            dst = os.path.join(dst["d"], dst["f"])
             shutil.copyfile(src, dst)
             
             self.event.info("[%s] New: %s" %(datetime.now(), dst))
