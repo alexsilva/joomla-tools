@@ -4,6 +4,7 @@ from uiExtension import Ui_MainWindow
 import extension
 import sys
 import os
+import browser
 
 ## -----------------------------------------------------------------------------
 class Event(extension.ExtEvent, QtCore.QObject):
@@ -11,6 +12,7 @@ class Event(extension.ExtEvent, QtCore.QObject):
     onInfo = QtCore.Signal(str)
     onError = QtCore.Signal(str)
     onStop = QtCore.Signal(str)
+    onChanges = QtCore.Signal(str)
     
     def __init__(self):
         QtCore.QObject.__init__(self)
@@ -24,7 +26,10 @@ class Event(extension.ExtEvent, QtCore.QObject):
         
     def stop(self, value):
         self.onStop.emit(value)
-    
+        
+    def changes(self, value):
+        self.onChanges.emit(value)
+        
 ## -----------------------------------------------------------------------------
 class Loader(QtGui.QMainWindow):
     """ MainWin loader """
@@ -59,11 +64,15 @@ class Loader(QtGui.QMainWindow):
         self._event.onInfo.connect(self.onInfo)
         self._event.onError.connect(self.onError)
         self._event.onStop.connect(self.onStop)
+        self._event.onChanges.connect(self.onChanges)
+        
+        self.browser = browser.Browser(self.tabBrowser)
+        self.tabBrowser.layout().addWidget( self.browser )
         
         self.readSettings()
         
     def onInfo(self, info):
-        self.eventLog.appendHtml('<p style="color:green;">%s</p>'%info)
+        self.eventLog.appendHtml('<p style="color:cyan;">%s</p>'%info)
         
     def onError(self, info):
         self.eventLog.appendHtml('<p style="color:red;">%s</p>'%info)
@@ -71,6 +80,10 @@ class Loader(QtGui.QMainWindow):
         
     def onStop(self, info):
         self.eventLog.appendHtml('<p style="color:blue;">%s</p>'%info)
+    
+    def onChanges(self, info):
+        self.eventLog.appendHtml('<p style="color:green;">%s</p>'%info)
+        self.browser.reload()
         
     def setDirectory(self):
         sender = self.sender()

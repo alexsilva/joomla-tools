@@ -36,7 +36,10 @@ class ExtEvent(object):
     
     def stop(self, value=''):
         pass
-
+    
+    def changes(self, value):
+        pass
+    
 ## ---------------------------------------------------------------------------
 class Defs(object):
     ADMIN_FOLDER = "administrator"
@@ -190,7 +193,7 @@ class ASBase(object):
             src, dst = self.buildPath(path, file)
             shutil.copyfile(src, dst)
             
-            self.event.info("[%s] Updated: %s" %(datetime.now(), dst))
+            self.event.changes("[%s] Updated: %s" %(datetime.now(), dst))
             
         for file in changes["removed"]:
             src, dst = self.buildPath(path, file)
