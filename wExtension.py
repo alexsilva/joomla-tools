@@ -51,6 +51,9 @@ class Loader(QtGui.QMainWindow):
         self.pluginChoosePath.clicked.connect(self.setDirectory )
         self.pluginChoosePath.related = self.pluginPath
         
+        self.moduleChoosePath.clicked.connect(self.setDirectory )
+        self.moduleChoosePath.related = self.modulePath
+        
         self.btnRun.clicked.connect(self.onBtnRunClicked)
         
         # taxa de atualização
@@ -66,13 +69,10 @@ class Loader(QtGui.QMainWindow):
         self._event.onStop.connect(self.onStop)
         self._event.onChanges.connect(self.onChanges)
         
-        self.browser = browser.Browser(self.tabBrowser)
-        self.tabBrowser.layout().addWidget( self.browser )
-        
         self.readSettings()
         
     def onInfo(self, info):
-        self.eventLog.appendHtml('<p style="color:cyan;">%s</p>'%info)
+        self.eventLog.appendHtml('<p style="color:#184a7d;">%s</p>'%info)
         
     def onError(self, info):
         self.eventLog.appendHtml('<p style="color:red;">%s</p>'%info)
@@ -83,7 +83,6 @@ class Loader(QtGui.QMainWindow):
     
     def onChanges(self, info):
         self.eventLog.appendHtml('<p style="color:green;">%s</p>'%info)
-        self.browser.reload()
         
     def setDirectory(self):
         sender = self.sender()
