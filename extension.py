@@ -393,7 +393,7 @@ class Module(ExtBase):
         
     ## -----------------------------------------------------------------------
     def __init__(self, name, path, joomla, event):
-        super(Plugin, self).__init__(name, path, joomla, event)
+        super(Module, self).__init__(name, path, joomla, event)
         self.site = Module.Site(self)
         
 ## -----------------------------------------------------------------------------
