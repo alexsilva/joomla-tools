@@ -343,7 +343,7 @@ class Plugin(ExtBase):
 ## ---------------------------------------------------------------------------
 class Module(ExtBase):
     type = Defs.MODULE
-    prefix = "com_"
+    prefix = "mod_"
     
     class Site(ASBase):
         
@@ -355,7 +355,7 @@ class Module(ExtBase):
         
         @property
         def client(self):
-            return self["client"]
+            return self.extension.root.get("client", "client no set")
         
         @property
         def basename(self):
@@ -395,7 +395,15 @@ class Module(ExtBase):
     def __init__(self, name, path, joomla, event):
         super(Module, self).__init__(name, path, joomla, event)
         self.site = Module.Site(self)
-        
+    
+    @property
+    def name(self):
+        return (self.extName if self.extName.startswith(self.prefix)
+                             else self.prefix + self.extName)
+    @property
+    def fullname(self):
+        return self.name
+    
 ## -----------------------------------------------------------------------------
 class Runner(threading.Thread):
     """ start the work check """
