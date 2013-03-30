@@ -46,12 +46,16 @@ class Defs(object):
     SITE_FOLDER = "." # root joomla
     
     COMPONENT = "COMPONENT"
-    COMPONENT_ADMIN_SIDE = "ADMIN"
-    COMPONENT_SITE_SIDE = "SITE"
+    COMPONENT_ADMIN_SIDE = "COMP_ADMIN"
+    COMPONENT_SITE_SIDE = "COMP_SITE"
     
     PLUGIN = "PLUGIN"
-    PLUGIN_ADMIN_SIDE = "ADMIN"
-    PLUGIN_SITE_SIDE = "SITE"
+    PLUGIN_ADMIN_SIDE = "PLG_ADMIN"
+    PLUGIN_SITE_SIDE = "PLG_SITE"
+    
+    MODULE = "MODULE"
+    MODULE_ADMIN_SIDE = "MOD_ADMIN"
+    MODULE_SITE_SIDE = "MOD_SITE"
     
 ## ---------------------------------------------------------------------------
 class ExtBase(object):
@@ -167,6 +171,14 @@ class ASBase(object):
             else:
                 dst = os.path.join(self.extension.joomla, self.basename, 
                                    self.extension.fullname, relpath)
+                
+        elif self.extension.type == Defs.MODULE:
+            if self.isLanguage(relpath):
+                dst = os.path.join(self.extension.joomla, os.path.dirname(self.basename), relpath)
+            else:
+                dst = os.path.join(self.extension.joomla, self.basename, 
+                                   self.extension.fullname, relpath)
+                
         else: raise RuntimeError, "In make path: Type error!"
         
         if join: dst = os.path.join(dst, filename)
@@ -327,6 +339,62 @@ class Plugin(ExtBase):
     def __init__(self, name, path, joomla, event):
         super(Plugin, self).__init__(name, path, joomla, event)
         self.site = Plugin.Site(self)
+
+## ---------------------------------------------------------------------------
+class Module(ExtBase):
+    type = Defs.MODULE
+    prefix = "com_"
+    
+    class Site(ASBase):
+        
+        def __init__(self, extension):
+            super(Module.Site, self).__init__(extension)
+            
+        def __getitem__(self, key):
+            return self.extension[key]
+        
+        @property
+        def client(self):
+            return self["client"]
+        
+        @property
+        def basename(self):
+            name = "modules"
+            return (name if self.client == "site" else os.path.join(Defs.ADMIN_FOLDER, name))
+        
+        @property
+        def side(self):
+            return (Defs.MODULE_SITE_SIDE if self.client == "site" else Defs.COMPONENT_ADMIN_SIDE)
+        
+        @property
+        def folder(self):
+            return ""
+        
+        @property
+        def folders(self):
+            files = self["files"]
+            return [e.text for e in (files.findall("folder") if not files is None else [])]
+            
+        @property
+        def filenames(self):
+            files = self["files"]
+            return [e.text for e in (files.findall("filename") if not files is None else [])]
+        
+        @property
+        def languages(self):
+            lang = self["languages"]
+            return [e.text.replace("/",os.sep) for e in (lang.findall("language") if not lang is None else [])]
+        
+        @property
+        def path(self):
+            path = os.path.join(self.extension.path, self.folder)
+            path = path.rstrip("/").rstrip(os.sep)
+            return path
+        
+    ## -----------------------------------------------------------------------
+    def __init__(self, name, path, joomla, event):
+        super(Plugin, self).__init__(name, path, joomla, event)
+        self.site = Module.Site(self)
         
 ## -----------------------------------------------------------------------------
 class Runner(threading.Thread):
@@ -347,10 +415,9 @@ class Runner(threading.Thread):
         self.rate = rate
         
         # auto scan files
-        if self.startExtensions():
-            t = threading.Timer(self.scanRate, self._scanFiles)
-            t.setDaemon(True); t.start()
-        
+        if self.startExtensions(): 
+            self._scanFiles()
+            
         self.setDaemon(True)
         
     def setRate(self, value):
