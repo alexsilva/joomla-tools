@@ -117,6 +117,7 @@ class Loader(QtGui.QMainWindow):
     def start(self):
         extentions = []
         joomla = self.joomlaPath.text()
+        
         scanRate = self.scanFilesRate.value()
         rate = self.rateCheck.value()
         
@@ -132,6 +133,11 @@ class Loader(QtGui.QMainWindow):
             path = self.pluginPath.text()
             extentions.append(extension.Plugin(name, path, joomla, self._event))
         
+        if os.path.exists(self.modulePath.text()):
+            name = self.moduleName.text()
+            path = self.modulePath.text()
+            extentions.append(extension.Module(name, path, joomla, self._event))
+            
         # run a new thread
         self.runner = extension.Runner(extentions, self._event, scanRate, rate)
         self.runner.start()
@@ -148,13 +154,21 @@ class Loader(QtGui.QMainWindow):
         
         settings.setValue("mainWindow/geometry", self.saveGeometry())
         settings.setValue("mainWindow/windowState", self.saveState())
+        
         settings.setValue("paths/joomla", self.joomlaPath.text())
+        
         settings.setValue("paths/component", self.componentPath.text())
         settings.setValue("names/component", self.componentName.text())
+        
         settings.setValue("paths/plugin", self.pluginPath.text())
         settings.setValue("names/plugin", self.pluginName.text())
+        
+        settings.setValue("paths/module", self.modulePath.text())
+        settings.setValue("names/module", self.moduleName.text())
+        
         settings.setValue("values/rate", self.rateCheck.value())
         settings.setValue("values/scanFiles", self.scanFilesRate.value())
+        
         return super(Loader,self).closeEvent(event)
         
     def readSettings(self):
@@ -162,11 +176,17 @@ class Loader(QtGui.QMainWindow):
         
         self.restoreGeometry(settings.value("mainWindow/geometry"))
         self.restoreState(settings.value("mainWindow/windowState"))
+        
         self.joomlaPath.setText(settings.value("paths/joomla"))
+        
         self.componentPath.setText(settings.value("paths/component"))
         self.componentName.setText(settings.value("names/component"))
+        
         self.pluginPath.setText(settings.value("paths/plugin"))
         self.pluginName.setText(settings.value("names/plugin"))
+        
+        self.modulePath.setText(settings.value("paths/module"))
+        self.moduleName.setText(settings.value("names/module"))
         
         self.rateCheck.setValue(float(settings.value("values/rate", 1.0)))
         self.scanFilesRate.setValue(float(settings.value("values/scanFiles", 10.0)))
