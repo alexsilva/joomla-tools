@@ -191,10 +191,11 @@ class Loader(QtGui.QMainWindow):
         self.rateCheck.setValue(float(settings.value("values/rate", 1.0)))
         self.scanFilesRate.setValue(float(settings.value("values/scanFiles", 10.0)))
         
-## ------------------------------------------------------------------------------------
-app = QtGui.QApplication(sys.argv)
 
-loader = Loader()
-loader.show()
+if __name__ == '__main__':
+    app = QtGui.QApplication(sys.argv)
 
-sys.exit(app.exec_())
+    loader = Loader()
+    loader.show()
+
+    sys.exit(app.exec_())
