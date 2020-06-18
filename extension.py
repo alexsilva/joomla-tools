@@ -214,9 +214,10 @@ class ASBase(object):
 
         for file in changes["removed"]:
             src, dst = self.buildPath(path, file)
-            if os.path.exists(dst): os.remove(dst)
+            if os.path.exists(dst):
+                os.remove(dst)
 
-            self.scanFiles()  ## update list files
+            self.scanFiles()  # update list files
             self.event.info("[%s] Removed: %s" % (datetime.now(), dst))
 
 
@@ -241,17 +242,17 @@ class Component(ExtBase):
         @property
         def folders(self):
             files = self["files"]
-            return [e.text for e in (files.findall("folder") if not files is None else [])]
+            return [e.text for e in (files.findall("folder") if files is not None else [])]
 
         @property
         def filenames(self):
             files = self["files"]
-            return [e.text for e in (files.findall("filename") if not files is None else [])]
+            return [e.text for e in (files.findall("filename") if files is not None else [])]
 
         @property
         def languages(self):
             lang = self["languages"]
-            return [e.text.replace("/", os.sep) for e in (lang.findall("language") if not lang is None else [])]
+            return [e.text.replace("/", os.sep) for e in (lang.findall("language") if lang is not None else [])]
 
         @property
         def path(self):
@@ -274,17 +275,17 @@ class Component(ExtBase):
         @property
         def folders(self):
             files = self["files"]
-            return [e.text for e in (files.findall("folder") if not files is None else [])]
+            return [e.text for e in (files.findall("folder") if files is not None else [])]
 
         @property
         def filenames(self):
             files = self["files"]
-            return [e.text for e in (files.findall("filename") if not files is None else [])]
+            return [e.text for e in (files.findall("filename") if files is not None else [])]
 
         @property
         def languages(self):
             lang = self["languages"]
-            return [e.text.replace("/", os.sep) for e in (lang.findall("language") if not lang is None else [])]
+            return [e.text.replace("/", os.sep) for e in (lang.findall("language") if lang is not None else [])]
 
         @property
         def path(self):
@@ -319,17 +320,17 @@ class Plugin(ExtBase):
         @property
         def folders(self):
             files = self["files"]
-            return [e.text for e in (files.findall("folder") if not files is None else [])]
+            return [e.text for e in (files.findall("folder") if files is not None else [])]
 
         @property
         def filenames(self):
             files = self["files"]
-            return [e.text for e in (files.findall("filename") if not files is None else [])]
+            return [e.text for e in (files.findall("filename") if files is not None else [])]
 
         @property
         def languages(self):
             lang = self["languages"]
-            return [e.text.replace("/", os.sep) for e in (lang.findall("language") if not lang is None else [])]
+            return [e.text.replace("/", os.sep) for e in (lang.findall("language") if lang is not None else [])]
 
         @property
         def path(self):
@@ -361,11 +362,11 @@ class Module(ExtBase):
         @property
         def basename(self):
             name = "modules"
-            return (name if self.client == "site" else os.path.join(Defs.ADMIN_FOLDER, name))
+            return name if self.client == "site" else os.path.join(Defs.ADMIN_FOLDER, name)
 
         @property
         def side(self):
-            return (Defs.MODULE_SITE_SIDE if self.client == "site" else Defs.COMPONENT_ADMIN_SIDE)
+            return Defs.MODULE_SITE_SIDE if self.client == "site" else Defs.COMPONENT_ADMIN_SIDE
 
         @property
         def folder(self):
@@ -374,17 +375,17 @@ class Module(ExtBase):
         @property
         def folders(self):
             files = self["files"]
-            return [e.text for e in (files.findall("folder") if not files is None else [])]
+            return [e.text for e in (files.findall("folder") if files is not None else [])]
 
         @property
         def filenames(self):
             files = self["files"]
-            return [e.text for e in (files.findall("filename") if not files is None else [])]
+            return [e.text for e in (files.findall("filename") if files is not None else [])]
 
         @property
         def languages(self):
             lang = self["languages"]
-            return [e.text.replace("/", os.sep) for e in (lang.findall("language") if not lang is None else [])]
+            return [e.text.replace("/", os.sep) for e in (lang.findall("language") if lang is not None else [])]
 
         @property
         def path(self):
