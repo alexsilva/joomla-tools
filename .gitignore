@@ -1,5 +1,6 @@
 *.py[cod]
 autoup.bat
+.idea
 
 # C extensions
 *.so
