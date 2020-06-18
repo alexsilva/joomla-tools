@@ -124,7 +124,8 @@ class Loader(QtGui.QMainWindow):
         scanRate = self.scanFilesRate.value()
         rate = self.rateCheck.value()
 
-        if not self.isValidJoomlaPath(joomla): return
+        if not self.isValidJoomlaPath(joomla):
+            return
 
         if os.path.exists(self.componentPath.text()):
             name = self.componentName.text()
