@@ -1,4 +1,5 @@
 *.py[cod]
+autoup.bat
 
 # C extensions
 *.so
