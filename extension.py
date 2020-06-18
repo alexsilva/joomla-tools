@@ -8,7 +8,7 @@ from datetime import datetime
 from xml.etree.ElementTree import ElementTree
 
 
-class capture_errors(object):
+class CaptureExceptions(object):
     def __init__(self, func):
         self.fun = func
 
@@ -24,7 +24,6 @@ class capture_errors(object):
         return wraper
 
 
-## ---------------------------------------------------------------------------
 class ExtEvent(object):
     """ Base for event infos """
 
@@ -440,20 +439,20 @@ class Runner(threading.Thread):
     def stop(self):
         self._continue = False
 
-    @capture_errors
+    @CaptureExceptions
     def startExtensions(self):
         """ analiza os dados e cria a lista de arquivos """
         for extension in self.extension:
             extension.start()
         return True
 
-    @capture_errors
+    @CaptureExceptions
     def scanFiles(self):
         self.startExtensions()
         self._event.info("[%s] Scan files" % datetime.now())
         return True
 
-    @capture_errors
+    @CaptureExceptions
     def _scanFiles(self):
         self.scanFiles()
         if self._continue:
@@ -462,7 +461,7 @@ class Runner(threading.Thread):
             t.start()
         return True
 
-    @capture_errors
+    @CaptureExceptions
     def execute(self):
         for ext in self.extension:
             if ext.admin is not None:
