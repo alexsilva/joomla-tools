@@ -465,9 +465,9 @@ class Runner(threading.Thread):
     @capture_errors
     def execute(self):
         for ext in self.extension:
-            if not ext.admin is None:
+            if ext.admin is not None:
                 ext.admin.send(ext.admin.check())
-            if not ext.site is None:
+            if ext.site is not None:
                 ext.site.send(ext.site.check())
         return True
 
