@@ -63,33 +63,33 @@ class Defs(object):
 class ExtBase(object):
     prefix = ""
 
-    def __init__(self, name, path, joomla, event):
+    def __init__(self, name, path, joomla_path, event):
         self.root = self.admin = self.site = None
         # full path of joomla
-        self.joomlaPath = joomla
+        self.joomla_path = joomla_path
         # extension name
-        self.extName = name
+        self.ext_name = name
         # extension path
-        self.extPath = path
+        self.ext_path = path
         self.event = event
 
     @property
     def name(self):
-        return self.extName
+        return self.ext_name
 
     @property
     def joomla(self):
-        return self.joomlaPath
+        return self.joomla_path
 
     @property
     def path(self):
-        return self.extPath
+        return self.ext_path
 
     @property
     def fullname(self):
         return self.prefix + self.name
 
-    def parseXml(self):
+    def parse_xml(self):
         etree = ElementTree()
         xmpath = os.path.join(self.path, self.name + ".xml")
         return etree.parse(xmpath)
@@ -98,13 +98,13 @@ class ExtBase(object):
         return self.root.find(key)
 
     def start(self):
-        self.root = self.parseXml()  ## refs files
+        self.root = self.parse_xml()  ## refs files
 
         if not self.admin is None:
-            self.admin.scanFiles()  ## update list files
+            self.admin.scan_files()  ## update list files
 
         if not self.site is None:
-            self.site.scanFiles()  ## update list files
+            self.site.scan_files()  ## update list files
 
 
 class ASBase(object):
@@ -117,7 +117,7 @@ class ASBase(object):
         return (getattr(self.extension, name, None) if hasattr(self.extension, name) else
                 super(ASBase, self).__getattr__(name))
 
-    def getFilesIn(self, folder):
+    def get_files_in(self, folder):
         fpath = os.path.join(self.path, folder)
         content = []
         for root, dirs, files in os.walk(fpath):
@@ -127,12 +127,12 @@ class ASBase(object):
                 content.append(os.path.relpath(filepath, self.path))
         return content
 
-    def scanFiles(self):
+    def scan_files(self):
         self.filelist = []
         self.filelist.extend(self.filenames)
 
         for folder in self.folders:
-            self.filelist.extend(self.getFilesIn(folder))
+            self.filelist.extend(self.get_files_in(folder))
 
         self.filelist.extend(self.languages)
 
@@ -140,7 +140,7 @@ class ASBase(object):
         changes = {"changed": [], "removed": [], "new": []}
 
         for file in self.filelist:
-            src, dst = self.buildPath(self.path, file)
+            src, dst = self.build_path(self.path, file)
 
             if os.path.exists(src):
                 if os.path.exists(dst):
@@ -152,30 +152,31 @@ class ASBase(object):
                 changes["removed"].append(file)
         return changes
 
-    def isLanguage(self, path):
+    @staticmethod
+    def is_language(path):
         return path.startswith("language")
 
-    def buildPath(self, path, file, join=True):
+    def build_path(self, path, file, join=True):
         relpath = os.path.dirname(file)
         filename = os.path.basename(file)
         src = os.path.join(path, file)
 
         if self.extension.type == Defs.COMPONENT:
-            if self.isLanguage(relpath):
+            if self.is_language(relpath):
                 dst = os.path.join(self.extension.joomla, os.path.dirname(self.basename), relpath)
             else:
                 dst = os.path.join(self.extension.joomla, self.basename,
                                    self.extension.fullname, relpath)
 
         elif self.extension.type == Defs.PLUGIN:
-            if self.isLanguage(relpath):
+            if self.is_language(relpath):
                 dst = os.path.join(self.extension.joomla, Defs.ADMIN_FOLDER, relpath)
             else:
                 dst = os.path.join(self.extension.joomla, self.basename,
                                    self.extension.fullname, relpath)
 
         elif self.extension.type == Defs.MODULE:
-            if self.isLanguage(relpath):
+            if self.is_language(relpath):
                 dst = os.path.join(self.extension.joomla, os.path.dirname(self.basename), relpath)
             else:
                 dst = os.path.join(self.extension.joomla, self.basename,
@@ -195,7 +196,7 @@ class ASBase(object):
         path = self.path
 
         for file in changes["new"]:
-            src, dst = self.buildPath(path, file, False)
+            src, dst = self.build_path(path, file, False)
 
             # contrói os diretórios necessários.
             if not os.path.exists(dst["d"]):
@@ -207,17 +208,17 @@ class ASBase(object):
             self.event.info("[%s] New: %s" % (datetime.now(), dst))
 
         for file in changes["changed"]:
-            src, dst = self.buildPath(path, file)
+            src, dst = self.build_path(path, file)
             shutil.copyfile(src, dst)
 
             self.event.changes("[%s] Updated: %s" % (datetime.now(), dst))
 
         for file in changes["removed"]:
-            src, dst = self.buildPath(path, file)
+            src, dst = self.build_path(path, file)
             if os.path.exists(dst):
                 os.remove(dst)
 
-            self.scanFiles()  # update list files
+            self.scan_files()  # update list files
             self.event.info("[%s] Removed: %s" % (datetime.now(), dst))
 
 
@@ -399,8 +400,8 @@ class Module(ExtBase):
 
     @property
     def name(self):
-        return (self.extName if self.extName.startswith(self.prefix)
-                else self.prefix + self.extName)
+        return (self.ext_name if self.ext_name.startswith(self.prefix)
+                else self.prefix + self.ext_name)
 
     @property
     def fullname(self):
@@ -410,9 +411,12 @@ class Module(ExtBase):
 class Runner(threading.Thread):
     """ start the work check """
 
-    def __init__(self, extension=[], event=None, scanRate=10.0, rate=1.0):
+    def __init__(self, extension=None, event=None, scan_rate=10.0, rate=1.0):
         super(Runner, self).__init__()
         self._continue = True
+
+        if extension is None:
+            extension = []
 
         # event info interface
         self._event = event
@@ -420,44 +424,44 @@ class Runner(threading.Thread):
         self.extension = extension
 
         # scan files rate
-        self.scanRate = scanRate
+        self.scan_rate = scan_rate
         # check files rate
         self.rate = rate
 
         # auto scan files
-        if self.startExtensions():
-            self._scanFiles()
+        if self.start_extensions():
+            self._scan_files()
 
         self.setDaemon(True)
 
-    def setRate(self, value):
+    def set_rate(self, value):
         """ altera o valor da taxa de atualização """
         self.rate = value
 
-    def setScanRate(self, value):
-        self.scanRate = value
+    def set_scan_rate(self, value):
+        self.scan_rate = value
 
     def stop(self):
         self._continue = False
 
     @CaptureExceptions
-    def startExtensions(self):
+    def start_extensions(self):
         """ analiza os dados e cria a lista de arquivos """
         for extension in self.extension:
             extension.start()
         return True
 
     @CaptureExceptions
-    def scanFiles(self):
-        self.startExtensions()
+    def scan_files(self):
+        self.start_extensions()
         self._event.info("[%s] Scan files" % datetime.now())
         return True
 
     @CaptureExceptions
-    def _scanFiles(self):
-        self.scanFiles()
+    def _scan_files(self):
+        self.scan_files()
         if self._continue:
-            t = threading.Timer(self.scanRate, self._scanFiles)
+            t = threading.Timer(self.scan_rate, self._scan_files)
             t.setDaemon(True)
             t.start()
         return True

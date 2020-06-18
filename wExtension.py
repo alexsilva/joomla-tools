@@ -109,13 +109,16 @@ class Loader(QtGui.QMainWindow):
         return valid
 
     def setRate(self, value):
-        if self.runner: self.runner.setRate(value)
+        if self.runner:
+            self.runner.set_rate(value)
 
     def setScanRate(self, value):
-        if self.runner: self.runner.setScanRate(value)
+        if self.runner:
+            self.runner.set_scan_rate(value)
 
     def scanNow(self):
-        if self.runner: self.runner.scanFiles()
+        if self.runner:
+            self.runner.scan_files()
 
     def start(self):
         extentions = []
