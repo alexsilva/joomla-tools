@@ -123,7 +123,7 @@ class ASBase(object):
         for root, dirs, files in os.walk(fpath):
             for filename in files:
                 filepath = os.path.join(root, filename)
-                ## usando o caminho relativo para o arquivo.
+                # usando o caminho relativo para o arquivo.
                 content.append(os.path.relpath(filepath, self.path))
         return content
 
