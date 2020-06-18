@@ -209,7 +209,19 @@ class ASBase(object):
 
         for file in changes["changed"]:
             src, dst = self.build_path(path, file)
-            shutil.copyfile(src, dst)
+
+            # safe check
+            if os.path.exists(dst):
+                dst_mtime = os.path.getmtime(dst)
+            else:
+                dst_mtime = 0
+
+            if os.path.getmtime(src) > dst_mtime:
+                shutil.copyfile(src, dst)
+            else:
+                # reverse sync
+                shutil.copyfile(dst, src)
+                dst = src
 
             self.event.changes("[%s] Updated: %s" % (datetime.now(), dst))
 
